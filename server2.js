@@ -3,7 +3,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   HOST = null;
   PORT = 9752;
-  starttime = (new Date).getTime;
+  starttime = (new Date).getTime();
   /*
   var mem = process.memoryUsage()
   every 10 seconds poll for the memory.

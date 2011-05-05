@@ -3,7 +3,7 @@ HOST = null # localhost
 PORT = 9752
 
 # when the daemon started
-starttime = (new Date).getTime
+starttime = (new Date).getTime()
 
 ###
 var mem = process.memoryUsage()
@@ -130,11 +130,6 @@ http.createServer (req, res) ->
       '''
       res.end result 
       fs.rename(files.upload.path, 'tmp/' + files.upload.name)
-      var client = knox.createClient({
-          key: '<api-key-here>'
-        , secret: '<secret-here>'
-        , bucket: 'learnboost'
-      });
       channel.appendMessage(null, "upload", files.upload.name)
     return
 
