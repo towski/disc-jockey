@@ -263,6 +263,13 @@ http.createServer(function(req, res) {
     });
   }
   
+  if (req.url == "/files"){
+    fs.readdir('./tmp', function(err, files){
+      res.simpleJSON(200, { files: files });
+      return;
+    })
+  }
+  
   if (req.url == "/" || req.url == "/style.css" || req.url == "/client.js" || req.url == "/jquery-1.2.6.min.js" || req.url == "/soundmanager2.js" || req.url == "/swf/soundmanager2.swf"){
     var uri = url.parse(req.url).pathname;  
     var filename = path.join(process.cwd(), uri);
