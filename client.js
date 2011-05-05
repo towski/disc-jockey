@@ -293,7 +293,7 @@ function songFinishCallback(){
     if(song){
       setTimeout(function(){ 
         $('#song_list li:first-child').remove()
-      }, 0);
+      }, 100);
       $('#current_song').html(song.text)
       currentSong = soundManager.createSound({
         id: song.text,
