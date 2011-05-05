@@ -26,26 +26,29 @@
   </head>
   <body>
     <div id="app">
-      <div id="connect">
+      <div id="connect" style="position:fixed; right:0px; top:300px; border: 1px solid;">
         <form action="#">
           <fieldset> 
 
-            <label for="nick">Name</label>
+            <h2>Login</h2>
             <input id="nickInput" class="text"type="text" name="nick" value=""/>
             <input id="connectButton" class="button" type="submit" name="" value="Join"/>
 
           </fieldset>
         </form>
       </div>
-      <div id="loading"><p>loading</p></div>
+      <div id="loading" style="position:fixed; right:100px; display:none"><p>loading</p></div>
       
-      <div style="position:fixed; right:100px">
-        current song :
+      <div style="position:fixed; right:100px; border: 1px solid;">
+        <b>current song:</b>
         <span id='current_song'></span>
         <br/>
-        song queue:
+        <b>song queue:</b>
         <ul id='song_list'>
         </ul>
+      </div>
+      <div style="position:fixed; right:300px; top:300px; border: 1px solid;">
+        <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
       </div>
       <div id="log">
         <table class="message"><tr><td class="date">18:58</td><td valign="top" class="nick">TTilus</td>
@@ -207,7 +210,6 @@
           <li>memory: <span id="rss">?</span>mb RSS</li>
           <li><a id='toggle_playback' onclick='if(local_playback){ stopLocalPlayback(); $("#toggle_playback").html("Play") } else { enableLocalPlayback(); $("#toggle_playback").html("Stop") }; return false' href='#'>Play</a></li>
           <li><a onclick='skipCurrentSong()' href='#' onclick='return false'>Skip current song</a></li>
-          <li><iframe src="/form" width="550" height="40" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe></li>
         </ul>
         <input tabindex="1" type="text" id="entry"/>
       </div>

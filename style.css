@@ -26,7 +26,7 @@ table {
 a { text-decoration: none; color: #888; }
 a:hover { text-decoration: underline; color: #aaa; }
 
-#loading, #connect {
+/*#loading {
   background: white;
   position: fixed;
   top: 0;
@@ -34,14 +34,14 @@ a:hover { text-decoration: underline; color: #aaa; }
   width: 100%;
   height: 100%;
   padding: 1em;
-}
+}*/
 
 #loading { z-index: 10000000; }
 #connect { z-index: 10000001; }
 
 #loading p, #connect fieldset  {
   font-family: DejaVu Sans Mono, fixed; 
-  width: 30em;
+  width: 10em;
   border: 0;
 }
 
@@ -60,6 +60,7 @@ a:hover { text-decoration: underline; color: #aaa; }
   border-width: 0;
   outline-width: 0;
   clear: both;
+  line-height: 3em;
 }
 
 #log {

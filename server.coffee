@@ -122,6 +122,7 @@ http.createServer (req, res) ->
     form.parse req, (err, fields, files) ->
       res.writeHead(200, {'content-type': 'text/html'})
       result = '''
+        <h2>Upload a Song (mp3)</h2>
         <form action="/upload" enctype="multipart/form-data" method="post">
         <input type="text" name="title" style="float:left">
         <input type="file" name="upload" multiple="multiple" style="float:left">
@@ -136,7 +137,8 @@ http.createServer (req, res) ->
   if (req.url == '/form')
     # show a file upload form
     res.writeHead(200, {'content-type': 'text/html'})
-    result = '<form action="/upload" enctype="multipart/form-data" method="post">
+    result = '<h2>Upload a Song (mp3)</h2>
+      <form action="/upload" enctype="multipart/form-data" method="post">
       <input type="text" name="title" style="float:left">
       <input type="file" name="upload" multiple="multiple" style="float:left">
       <input type="submit" value="Upload" style="float:left">
@@ -163,7 +165,6 @@ http.createServer (req, res) ->
       session = sessions[id]
       session.poke()
     since = parseInt qs.parse(url.parse(req.url).query).since, 10
-  
     channel.query since, (messages) ->
       if (session) 
         session.poke()

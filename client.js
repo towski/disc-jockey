@@ -421,8 +421,8 @@ function send(msg) {
 //Transition the page to the state that prompts the user for a nickname
 function showConnect () {
   $("#connect").show();
-  $("#loading").hide();
-  $("#toolbar").hide();
+  //$("#loading").hide();
+  //$("#toolbar").hide();
   $("#nickInput").focus();
 }
 

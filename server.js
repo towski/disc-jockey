@@ -148,7 +148,7 @@
         res.writeHead(200, {
           'content-type': 'text/html'
         });
-        result = '<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="text" name="title" style="float:left">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
+        result = '<h2>Upload a Song (mp3)</h2>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="text" name="title" style="float:left">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
         res.end(result);
         fs.rename(files.upload.path, 'tmp/' + files.upload.name);
         return channel.appendMessage(null, "upload", files.upload.name);
@@ -159,7 +159,8 @@
       res.writeHead(200, {
         'content-type': 'text/html'
       });
-      result = '<form action="/upload" enctype="multipart/form-data" method="post">\
+      result = '<h2>Upload a Song (mp3)</h2>\
+      <form action="/upload" enctype="multipart/form-data" method="post">\
       <input type="text" name="title" style="float:left">\
       <input type="file" name="upload" multiple="multiple" style="float:left">\
       <input type="submit" value="Upload" style="float:left">\
