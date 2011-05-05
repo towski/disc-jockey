@@ -291,7 +291,9 @@ function songFinishCallback(){
     var song = songs[0];
     songs = songs.splice(1, songs.length)
     if(song){
-      var first_element = $('#song_list li:first-child').remove()
+      setTimeout(function(){ 
+        $('#song_list li:first-child').remove()
+      }, 0);
       $('#current_song').html(song.text)
       currentSong = soundManager.createSound({
         id: song.text,
