@@ -291,11 +291,7 @@ function songFinishCallback(){
     var song = songs[0];
     songs = songs.splice(1, songs.length)
     if(song){
-      setTimeout(function(){ 
-        console.log("removing");
-        $('#song_list li:first-child').remove();
-        console.log($('#song_list li:first-child').length);
-      }, 100);
+      $('#song_list li:first-child').remove();
       $('#current_song').html(song.text)
       currentSong = soundManager.createSound({
         id: song.text,
@@ -315,6 +311,7 @@ function startPlayback(message){
     playback_started = true;
     first_song = message;
     var startSong = function() {
+      $('#song_list li:first-child').remove();
       $('#current_song').html(first_song.text)
       currentSong = soundManager.createSound({
         id: first_song.text,
