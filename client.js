@@ -292,6 +292,7 @@ function songFinishCallback(){
     songs = songs.splice(1, songs.length)
     if(song){
       setTimeout(function(){ 
+        console.log("removing");
         $('#song_list li:first-child').remove();
         console.log($('#song_list li:first-child').length);
       }, 100);
