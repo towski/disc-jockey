@@ -1,0 +1,4 @@
+Modified chat room demo, with song uploading support and playback
+
+to run
+$ /usr/local/bin/node server.js
