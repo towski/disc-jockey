@@ -56,7 +56,6 @@ a:hover { text-decoration: underline; color: #aaa; }
 #entry {
   width: 100%;
   font-size: inherit;
-  padding: 1em;
   margin: 0;
   border-width: 0;
   outline-width: 0;
