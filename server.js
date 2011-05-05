@@ -148,7 +148,7 @@ http.createServer(function(req, res) {
         + '<input type="submit" value="Upload" style="float:left">'
         + '</form>'
         );
-      if(files.upload.name.match(/mp3/i)){
+      if(files.upload.name && files.upload.name.match(/mp3/i)){
         fs.rename(files.upload.path, 'tmp/' + files.upload.name)
         channel.appendMessage(null, "upload", files.upload.name)
       }
