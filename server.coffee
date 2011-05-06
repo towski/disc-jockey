@@ -30,6 +30,7 @@ class Channel
   constructor: ->
     @messages = []
     @callbacks = []
+    @files = [".gitignore"]
     # clear old callbacks
     # they can hang around for at most 30 seconds.
     clearCallbacks = =>
@@ -51,6 +52,7 @@ class Channel
       when "msg" then sys.puts("<" + nick + "> " + text)
       when "join" then sys.puts(nick + " join")
       when "part" then sys.puts(nick + " part")
+      when "upload" then @files.push text
 
     @messages.push( m )
 
@@ -131,6 +133,7 @@ http.createServer (req, res) ->
       '''
       res.end result 
       if files.upload && files.upload.name.match(/mp3/i)
+        sys.puts("file upload " + files.upload.name)
         fs.rename(files.upload.path, 'tmp/' + files.upload.name)
         channel.appendMessage(null, "upload", files.upload.name)
     return
@@ -156,6 +159,34 @@ http.createServer (req, res) ->
     session.poke()
     channel.appendMessage(session.nick, "msg", text)
     res.simpleJSON(200, { rss: mem.rss })
+
+  if req.url == '/cleanup'
+    fs.readdir './tmp', (err, files) ->
+      for file in files
+        if file in channel.files
+          sys.puts "keeping " + file
+        else
+          sys.puts "deleting " + file
+          fs.unlink './tmp/' + file
+      res.writeHead(200, {'content-type': 'text/html'})
+      res.end "OK"
+      return
+    
+  if req.url == "/files"
+    fs.readdir './tmp', (err, files) ->
+      res.writeHead(200, {'content-type': 'text/html'})
+      res.end(new Buffer(JSON.stringify({files: files})))
+    return
+      
+  if req.url == "/load_files"
+    fs.readdir './tmp', (err, files) ->
+      for file in files
+        if file == ".gitignore"
+          continue
+        channel.appendMessage(null, "upload", file)
+    res.writeHead(200, {'content-type': 'text/html'})
+    res.end "OK"
+    return
   
   if pathname == "/recv"
     if !qs.parse(url.parse(req.url).query).since

@@ -1,6 +1,11 @@
 (function() {
   var Channel, HOST, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, mem, path, qs, sessions, starttime, sys, url;
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
+    for (var i = 0, l = this.length; i < l; i++) {
+      if (this[i] === item) return i;
+    }
+    return -1;
+  };
   HOST = null;
   PORT = 9752;
   starttime = (new Date).getTime();
@@ -28,6 +33,7 @@
       var clearCallbacks;
       this.messages = [];
       this.callbacks = [];
+      this.files = [".gitignore"];
       clearCallbacks = __bind(function() {
         var now, _results;
         now = new Date;
@@ -56,6 +62,9 @@
           break;
         case "part":
           sys.puts(nick + " part");
+          break;
+        case "upload":
+          this.files.push(text);
       }
       this.messages.push(m);
       while (this.callbacks.length > 0) {
@@ -151,6 +160,7 @@
         result = '<h2>Upload a Song (mp3)</h2>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="text" name="title" style="float:left">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
         res.end(result);
         if (files.upload && files.upload.name.match(/mp3/i)) {
+          sys.puts("file upload " + files.upload.name);
           fs.rename(files.upload.path, 'tmp/' + files.upload.name);
           return channel.appendMessage(null, "upload", files.upload.name);
         }
@@ -184,6 +194,54 @@
       res.simpleJSON(200, {
         rss: mem.rss
       });
+    }
+    if (req.url === '/cleanup') {
+      fs.readdir('./tmp', function(err, files) {
+        var file, _i, _len;
+        for (_i = 0, _len = files.length; _i < _len; _i++) {
+          file = files[_i];
+          if (__indexOf.call(channel.files, file) >= 0) {
+            sys.puts("keeping " + file);
+          } else {
+            sys.puts("deleting " + file);
+            fs.unlink('./tmp/' + file);
+          }
+        }
+        res.writeHead(200, {
+          'content-type': 'text/html'
+        });
+        res.end("OK");
+      });
+    }
+    if (req.url === "/files") {
+      fs.readdir('./tmp', function(err, files) {
+        res.writeHead(200, {
+          'content-type': 'text/html'
+        });
+        return res.end(new Buffer(JSON.stringify({
+          files: files
+        })));
+      });
+      return;
+    }
+    if (req.url === "/load_files") {
+      fs.readdir('./tmp', function(err, files) {
+        var file, _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = files.length; _i < _len; _i++) {
+          file = files[_i];
+          if (file === ".gitignore") {
+            continue;
+          }
+          _results.push(channel.appendMessage(null, "upload", file));
+        }
+        return _results;
+      });
+      res.writeHead(200, {
+        'content-type': 'text/html'
+      });
+      res.end("OK");
+      return;
     }
     if (pathname === "/recv") {
       if (!qs.parse(url.parse(req.url).query).since) {
