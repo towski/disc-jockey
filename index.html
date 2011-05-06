@@ -26,7 +26,7 @@
   </head>
   <body>
     <div id="app">
-      <div id="connect" style="position:fixed; right:0px; top:300px; border: 1px solid;">
+      <div id="connect" style="position:fixed; right:600px; border: 1px solid;">
         <form action="#">
           <fieldset> 
 
@@ -47,7 +47,7 @@
         <ul id='song_list'>
         </ul>
       </div>
-      <div style="position:fixed; right:300px; top:300px; border: 1px solid;">
+      <div style="position:fixed; right:500px; top:300px; border: 1px solid;">
         <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
       </div>
       <div id="log">
@@ -205,7 +205,7 @@
       </div>
       <div id="toolbar">
         <ul id="status">
-          <li><a id="usersLink" href="#">5 users</a></li>
+          <li><a id="usersLink" href="#">? users</a></li>
           <li>uptime: <span id="uptime">?</span></li>
           <li>memory: <span id="rss">?</span>mb RSS</li>
           <li><a id='toggle_playback' onclick='if(local_playback){ stopLocalPlayback(); $("#toggle_playback").html("Play") } else { enableLocalPlayback(); $("#toggle_playback").html("Stop") }; return false' href='#'>Play</a></li>
