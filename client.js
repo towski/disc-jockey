@@ -295,7 +295,7 @@ function songFinishCallback(){
       $('#current_song').html(song.text)
       currentSong = soundManager.createSound({
         id: song.text,
-        url:"/tmp/" + song.text,
+        url:"/tmp/" + escape(song.text),
         onfinish:songFinishCallback
       });
       soundManager.play(song.text);
@@ -315,7 +315,7 @@ function startPlayback(message){
       $('#current_song').html(first_song.text)
       currentSong = soundManager.createSound({
         id: first_song.text,
-        url:"/tmp/" + first_song.text,
+        url:"/tmp/" + escape(first_song.text),
         onfinish:songFinishCallback
       })
       currentSong.play(first_song.text);
