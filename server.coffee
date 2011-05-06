@@ -1,6 +1,6 @@
 HOST = null # localhost
 #PORT = 8003
-PORT = 9752
+PORT = 9817
 
 # when the daemon started
 starttime = (new Date).getTime()
