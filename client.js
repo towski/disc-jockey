@@ -1,5 +1,5 @@
 (function() {
-  var CONFIG, addMessage, currentSong, enableLocalPlayback, first_poll, local_playback, longPoll, nicks, onConnect, outputUsers, playback_started, rss, scrollDown, send, showChat, showConnect, showLoad, skipCurrentSong, songFinishCallback, songs, startPlayback, starttime, stopLocalPlayback, transmission_errors, updateRSS, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
+  var CONFIG, addMessage, longPoll, nicks, onConnect, outputUsers, rss, scrollDown, send, showChat, showConnect, showLoad, starttime, updateRSS, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
   CONFIG = {
     debug: false,
     nick: "#",
@@ -105,7 +105,7 @@
     }
   };
   scrollDown = function() {
-    window.scrollBy(0, 100000000000000000);
+    $('#log').scrollTop(1000000);
     return $("#entry").focus();
   };
   addMessage = function(from, text, time, _class) {
@@ -129,10 +129,7 @@
       messageElement.addClass("personal");
     }
     text = text.replace(util.urlRE, '<a target="_blank" href="$&">$&</a>');
-    content = '<tr>' + +'  <td class="date">' + util.timeString(time) + '</td>';
-    +'  <td class="nick">' + util.toStaticHTML(from) + '</td>';
-    +'  <td class="msg-text">' + text + '</td>';
-    +'</tr>';
+    content = "<tr>\n   <td class=\"date\">" + (util.timeString(time)) + "</td>\n   <td class=\"nick\">" + (util.toStaticHTML(from)) + "</td>\n   <td class=\"msg-text\">" + text + "</td>\n</tr>";
     messageElement.html(content);
     $("#log").append(messageElement);
     return scrollDown();
@@ -151,27 +148,28 @@
       return $("#uptime").text(starttime.toRelativeTime());
     }
   };
-  transmission_errors = 0;
-  first_poll = true;
-  songs = [];
-  playback_started = false;
-  currentSong = null;
-  local_playback = false;
-  stopLocalPlayback = function() {
-    local_playback = false;
-    playback_started = false;
-    if (currentSong) {
-      currentSong.stop();
-      currentSong.destruct();
-      return currentSong = null;
+  window.transmission_errors = 0;
+  window.first_poll = true;
+  window.songs = [];
+  window.playback_started = false;
+  window.currentSong = null;
+  window.local_playback = false;
+  window.stopLocalPlayback = function() {
+    window.local_playback = false;
+    window.playback_started = false;
+    if (window.currentSong) {
+      window.currentSong.stop();
+      window.currentSong.destruct();
+      return window.currentSong = null;
     }
   };
-  enableLocalPlayback = function() {
-    local_playback = true;
-    playback_started = true;
+  window.enableLocalPlayback = function() {
+    window.local_playback = true;
+    window.playback_started = true;
     return songFinishCallback();
   };
-  skipCurrentSong = function() {
+  window.skipCurrentSong = function() {
+    var currentSong;
     if (currentSong) {
       currentSong.stop();
       currentSong.destruct();
@@ -179,11 +177,12 @@
     }
     return songFinishCallback();
   };
-  songFinishCallback = function() {
-    var song;
-    if (local_playback) {
-      song = songs[0];
-      songs = songs.splice(1, songs.length);
+  window.songFinishCallback = function() {
+    var currentSong, playback_started, song;
+    if (window.local_playback) {
+      song = window.songs[0];
+      window.songs = window.songs.splice(1, window.songs.length);
+      console.log(song);
       if (song) {
         $('#song_list li:first-child').remove();
         $('#current_song').html(song.text);
@@ -199,28 +198,28 @@
       }
     }
   };
-  startPlayback = function(message) {
+  window.startPlayback = function(message) {
     var first_song, startSong;
-    if (!playback_started && local_playback) {
-      playback_started = true;
+    if (!window.playback_started && window.local_playback) {
+      window.playback_started = true;
       first_song = message;
       startSong = function() {
         $('#song_list li:first-child').remove();
         $('#current_song').html(first_song.text);
-        currentSong = soundManager.createSound({
+        window.currentSong = soundManager.createSound({
           id: first_song.text,
           url: "/tmp/" + escape(first_song.text),
           onfinish: songFinishCallback
         });
-        return currentSong.play(first_song.text);
+        return window.currentSong.play(first_song.text);
       };
       return soundManager.onready(startSong);
     } else {
-      return songs = songs.concat(message);
+      return window.songs = window.songs.concat(message);
     }
   };
   longPoll = function(data) {
-    var message, rss, _i, _len, _ref;
+    var first_poll, message, rss, _i, _len, _ref;
     if (transmission_errors > 2) {
       showConnect();
       return;
@@ -282,6 +281,7 @@
         return setTimeout(longPoll, 10 * 1000);
       },
       success: function(data) {
+        var transmission_errors;
         transmission_errors = 0;
         return longPoll(data);
       }
@@ -309,6 +309,7 @@
   showChat = function(nick) {
     $("#toolbar").show();
     $("#entry").focus();
+    $("#entry").show();
     $("#connect").hide();
     $("#loading").hide();
     return scrollDown();
@@ -333,8 +334,6 @@
     CONFIG.id = session.id;
     starttime = new Date(session.starttime);
     rss = session.rss;
-    updateRSS();
-    updateUptime();
     showChat(CONFIG.nick);
     $(window).bind("blur", function() {
       CONFIG.focus = false;
@@ -404,7 +403,8 @@
         },
         success: onConnect
       };
-      return $.ajax(ajax_params);
+      $.ajax(ajax_params);
+      return false;
     });
     $("#youtube_form").submit(function() {
       var ajax_params;
@@ -435,9 +435,6 @@
       id: "myytplayer"
     };
     swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "1", "1", "8", null, null, params, atts);
-    setInterval(function() {
-      return updateUptime();
-    }, 10 * 1000);
     if (CONFIG.debug) {
       $("#loading").hide();
       $("#connect").hide();

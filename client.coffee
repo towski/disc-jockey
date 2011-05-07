@@ -118,7 +118,8 @@ util = {
 
 #used to keep the most recent messages visible
 scrollDown = () ->
-  window.scrollBy(0, 100000000000000000)
+  $('#log').scrollTop(1000000)
+  #window.scrollBy(0, 100000000000000000)
   $("#entry").focus()
   
 #inserts an event into the stream for display
@@ -157,12 +158,14 @@ addMessage = (from, text, time, _class) ->
   # replace URLs with links
   text = text.replace(util.urlRE, '<a target="_blank" href="$&">$&</a>')
 
-  content = '<tr>' +
-              + '  <td class="date">' + util.timeString(time) + '</td>'
-              + '  <td class="nick">' + util.toStaticHTML(from) + '</td>'
-              + '  <td class="msg-text">' + text  + '</td>'
-              + '</tr>'
-              
+  content = """
+    <tr>
+       <td class="date">#{ util.timeString(time) }</td>
+       <td class="nick">#{ util.toStaticHTML(from) }</td>
+       <td class="msg-text">#{ text }</td>
+    </tr>
+  """
+  
   messageElement.html(content)
 
   #the log is the stream that we view
@@ -182,37 +185,38 @@ updateUptime = () ->
   if (starttime)
     $("#uptime").text(starttime.toRelativeTime())
 
-transmission_errors = 0
-first_poll = true
-songs = []
-playback_started = false
-currentSong = null
-local_playback = false
+window.transmission_errors = 0
+window.first_poll = true
+window.songs = []
+window.playback_started = false
+window.currentSong = null
+window.local_playback = false
 
-stopLocalPlayback = () ->
-  local_playback = false
-  playback_started = false
+window.stopLocalPlayback = () ->
+  window.local_playback = false
+  window.playback_started = false
+  if(window.currentSong)
+    window.currentSong.stop()
+    window.currentSong.destruct()
+    window.currentSong = null
+
+window.enableLocalPlayback = () ->
+  window.local_playback = true
+  window.playback_started = true
+  songFinishCallback()
+
+window.skipCurrentSong = () ->
   if(currentSong)
     currentSong.stop()
     currentSong.destruct()
     currentSong = null
-
-enableLocalPlayback = () ->
-  local_playback = true
-  playback_started = true
   songFinishCallback()
 
-skipCurrentSong = () ->
-  if(currentSong)
-    currentSong.stop()
-    currentSong.destruct()
-    currentSong = null
-  songFinishCallback()
-
-songFinishCallback = () ->
-  if(local_playback)
-    song = songs[0]
-    songs = songs.splice(1, songs.length)
+window.songFinishCallback = () ->
+  if(window.local_playback)
+    song = window.songs[0]
+    window.songs = window.songs.splice(1, window.songs.length)
+    console.log(song)
     if(song)
       $('#song_list li:first-child').remove()
       $('#current_song').html(song.text)
@@ -226,22 +230,22 @@ songFinishCallback = () ->
       $('#current_song').html("")
       playback_started = false
 
-startPlayback = (message) ->
-  if(!playback_started && local_playback)
-    playback_started = true
+window.startPlayback = (message) ->
+  if(!window.playback_started && window.local_playback)
+    window.playback_started = true
     first_song = message
     startSong = () ->
       $('#song_list li:first-child').remove()
       $('#current_song').html(first_song.text)
-      currentSong = soundManager.createSound({
+      window.currentSong = soundManager.createSound({
         id: first_song.text,
         url:"/tmp/" + escape(first_song.text),
         onfinish:songFinishCallback
       })
-      currentSong.play(first_song.text)
+      window.currentSong.play(first_song.text)
     soundManager.onready(startSong)
   else
-    songs = songs.concat(message)
+    window.songs = window.songs.concat(message)
 
 #process updates if we have any, request updates from the server,
 # and call again with response. the last part is like recursion except the call
@@ -335,6 +339,7 @@ showLoad = () ->
 showChat = (nick) ->
   $("#toolbar").show()
   $("#entry").focus()
+  $("#entry").show()
   $("#connect").hide()
   $("#loading").hide()
   scrollDown()
@@ -363,8 +368,6 @@ onConnect = (session) ->
   CONFIG.id   = session.id
   starttime   = new Date(session.starttime)
   rss         = session.rss
-  updateRSS()
-  updateUptime()
 
   #update the UI to show the chat
   showChat(CONFIG.nick)
@@ -434,6 +437,7 @@ $(document).ready () ->
       , success: onConnect
     }
     $.ajax ajax_params
+    return false
     
   $("#youtube_form").submit () ->
     try
@@ -451,11 +455,6 @@ $(document).ready () ->
   params = { allowScriptAccess: "always" }
   atts = { id: "myytplayer" }
   swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "1", "1", "8", null, null, params, atts)
-
-  # update the daemon uptime every 10 seconds
-  setInterval () ->
-    updateUptime()
-  , 10*1000
 
   if (CONFIG.debug)
     $("#loading").hide()
