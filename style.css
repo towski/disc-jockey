@@ -49,6 +49,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 #activity {  
   float:right;
   background:white;
+  border: 1px solid;
 }
 
 #toolbar {
@@ -68,7 +69,6 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #log {
   width: 300px;
-  border: 1px solid;
   display: block;
   height: 60%;
   /* enough padding to clear the toolbar.. is there a better way to do this? */

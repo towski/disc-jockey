@@ -57,7 +57,7 @@
         </div>
         <div id="loading" style="position:fixed; display:none"><p>loading</p></div>
       </div>
-      <div style="border: 1px solid; width:600px;">
+      <div id="currently" style="border: 1px solid; width:600px;height: 400;">
         <a id='toggle_playback' onclick='if(local_playback){ stopLocalPlayback(); $("#toggle_playback").html("Play") } else { enableLocalPlayback(); $("#toggle_playback").html("Stop") }; return false' href='#'>Play</a>
         <a onclick='skipCurrentSong()' href='#' onclick='return false'>Skip</a>
         <h2>Currently</h2>
@@ -70,12 +70,12 @@
       <div style="border: 1px solid;">
         <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
       </div>
-      <div style="border: 1px solid;">
+      <div style="border: 1px solid; display:none">
         <form action="/submit_youtube_link" id='youtube_form' method="post" onsubmit='return false;'>
+          <a href='http://www.youtube.com/results' style='float:right;margin-right:200px;' target="_blank">youtube search</a>
           <h2>Submit a youtube link</h2>
-          <input type="text" name="youtube link" style="float:left">
-          <input type="submit" value="submit" style="float:left">
-          hey
+          <input type="text" name="youtube link" style="float:left; width:300px;">
+          <input type="submit" value="submit" style="float:left"> &nbsp;
         </form>
       </div>
       <div id="ytapiplayer">
