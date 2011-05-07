@@ -148,77 +148,11 @@
       return $("#uptime").text(starttime.toRelativeTime());
     }
   };
-  window.transmission_errors = 0;
-  window.first_poll = true;
-  window.songs = [];
-  window.playback_started = false;
-  window.currentSong = null;
-  window.local_playback = false;
-  window.stopLocalPlayback = function() {
-    window.local_playback = false;
-    window.playback_started = false;
-    if (window.currentSong) {
-      window.currentSong.stop();
-      window.currentSong.destruct();
-      return window.currentSong = null;
-    }
-  };
-  window.enableLocalPlayback = function() {
-    window.local_playback = true;
-    window.playback_started = true;
-    return songFinishCallback();
-  };
-  window.skipCurrentSong = function() {
-    if (window.currentSong) {
-      window.currentSong.stop();
-      window.currentSong.destruct();
-      window.currentSong = null;
-    }
-    return songFinishCallback();
-  };
-  window.songFinishCallback = function() {
-    var playback_started, song;
-    if (window.local_playback) {
-      song = window.songs[0];
-      window.songs = window.songs.splice(1, window.songs.length);
-      console.log(song);
-      if (song) {
-        $('#song_list li:first-child').remove();
-        $('#current_song').html(song.text);
-        window.currentSong = soundManager.createSound({
-          id: song.text,
-          url: "/tmp/" + escape(song.text),
-          onfinish: songFinishCallback
-        });
-        return soundManager.play(song.text);
-      } else {
-        $('#current_song').html("");
-        return playback_started = false;
-      }
-    }
-  };
-  window.startPlayback = function(message) {
-    var first_song, startSong;
-    if (!window.playback_started && window.local_playback) {
-      window.playback_started = true;
-      first_song = message;
-      startSong = function() {
-        $('#song_list li:first-child').remove();
-        $('#current_song').html(first_song.text);
-        window.currentSong = soundManager.createSound({
-          id: first_song.text,
-          url: "/tmp/" + escape(first_song.text),
-          onfinish: songFinishCallback
-        });
-        return window.currentSong.play(first_song.text);
-      };
-      return soundManager.onready(startSong);
-    } else {
-      return window.songs = window.songs.concat(message);
-    }
-  };
+  window.media_queue = new MediaQueue;
+  transmission_errors = 0;
+  first_poll = true;
   longPoll = function(data) {
-    var first_poll, message, rss, _i, _len, _ref;
+    var message, rss, _i, _len, _ref;
     if (transmission_errors > 2) {
       showConnect();
       return;
