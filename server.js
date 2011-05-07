@@ -1,5 +1,5 @@
 (function() {
-  var Channel, HOST, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, mem, path, qs, sessions, starttime, sys, url;
+  var Channel, HOST, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, mem, path, qs, sessions, starttime, static_files, sys, url;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
     for (var i = 0, l = this.length; i < l; i++) {
       if (this[i] === item) return i;
@@ -9,6 +9,7 @@
   HOST = null;
   PORT = 9817;
   starttime = (new Date).getTime();
+  static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js"];
   /*
   var mem = process.memoryUsage()
   every 10 seconds poll for the memory.
@@ -139,7 +140,7 @@
     return _results;
   }, 1000);
   http.createServer(function(req, res) {
-    var filename, form, id, match, nick, nicks, pathname, result, session, since, text, uri, _i, _len;
+    var filename, form, id, match, nick, nicks, pathname, response_json, result, session, since, text, uri, _i, _len, _ref;
     pathname = url.parse(req.url).pathname;
     res.simpleJSON = function(code, obj) {
       var body;
@@ -151,7 +152,7 @@
       return res.end(body);
     };
     if (req.url === '/upload' && req.method.toLowerCase() === 'post') {
-      form = new formidable.IncomingForm();
+            form = new formidable.IncomingForm();
       form.parse(req, function(err, fields, files) {
         var result;
         res.writeHead(200, {
@@ -164,10 +165,8 @@
           fs.rename(files.upload.path, 'tmp/' + files.upload.name);
           return channel.appendMessage(null, "upload", files.upload.name);
         }
-      });
-      return;
-    }
-    if (req.url === '/form') {
+      });;
+    } else if (req.url === '/form') {
       res.writeHead(200, {
         'content-type': 'text/html'
       });
@@ -177,9 +176,15 @@
       <input type="file" name="upload" multiple="multiple" style="float:left">\
       <input type="submit" value="Upload" style="float:left">\
       </form>';
-      res.end(result);
-    }
-    if (pathname === "/send") {
+      return res.end(result);
+    } else if (req.url === '/submit_youtube_link' && req.method.toLowerCase() === 'post') {
+      form = new formidable.IncomingForm();
+      return form.parse(req, function(err, fields, files) {
+        sys.puts("submitted youtube link");
+        channel.appendMessage(null, "youtube", fields.youtube);
+        return res.end("ok");
+      });
+    } else if (pathname === "/send") {
       id = qs.parse(url.parse(req.url).query).id;
       text = qs.parse(url.parse(req.url).query).text;
       session = sessions[id];
@@ -191,12 +196,11 @@
       }
       session.poke();
       channel.appendMessage(session.nick, "msg", text);
-      res.simpleJSON(200, {
+      return res.simpleJSON(200, {
         rss: mem.rss
       });
-    }
-    if (req.url === '/cleanup') {
-      fs.readdir('./tmp', function(err, files) {
+    } else if (req.url === '/cleanup') {
+      return fs.readdir('./tmp', function(err, files) {
         var file, _i, _len;
         for (_i = 0, _len = files.length; _i < _len; _i++) {
           file = files[_i];
@@ -212,8 +216,7 @@
         });
         res.end("OK");
       });
-    }
-    if (req.url === "/files") {
+    } else if (req.url === "/files") {
       fs.readdir('./tmp', function(err, files) {
         res.writeHead(200, {
           'content-type': 'text/html'
@@ -222,10 +225,8 @@
           files: files
         })));
       });
-      return;
-    }
-    if (req.url === "/load_files") {
-      fs.readdir('./tmp', function(err, files) {
+    } else if (req.url === "/load_files") {
+            fs.readdir('./tmp', function(err, files) {
         var file, _i, _len, _results;
         _results = [];
         for (_i = 0, _len = files.length; _i < _len; _i++) {
@@ -240,10 +241,14 @@
       res.writeHead(200, {
         'content-type': 'text/html'
       });
-      res.end("OK");
-      return;
-    }
-    if (pathname === "/recv") {
+      res.end("OK");;
+    } else if (req.url === "/load_file") {
+            channel.appendMessage(null, "upload", file);
+      res.writeHead(200, {
+        'content-type': 'text/html'
+      });
+      res.end("OK");;
+    } else if (pathname === "/recv") {
       if (!qs.parse(url.parse(req.url).query).since) {
         res.simpleJSON(400, {
           error: "Must supply since parameter"
@@ -256,7 +261,7 @@
         session.poke();
       }
       since = parseInt(qs.parse(url.parse(req.url).query).since, 10);
-      channel.query(since, function(messages) {
+      return channel.query(since, function(messages) {
         if (session) {
           session.poke();
         }
@@ -265,18 +270,16 @@
           rss: mem.rss
         });
       });
-    }
-    if (pathname === "/part") {
+    } else if (pathname === "/part") {
       id = qs.parse(url.parse(req.url).query).id;
       if (id && sessions[id]) {
         session = sessions[id];
         session.destroy();
       }
-      res.simpleJSON(200, {
+      return res.simpleJSON(200, {
         rss: mem.rss
       });
-    }
-    if (pathname === "/join") {
+    } else if (pathname === "/join") {
       nick = qs.parse(url.parse(req.url).query).nick;
       if (nick === null || nick.length === 0) {
         res.simpleJSON(400, {
@@ -292,14 +295,14 @@
         return;
       }
       channel.appendMessage(session.nick, "join");
-      res.simpleJSON(200, {
+      response_json = {
         id: session.id,
         nick: session.nick,
         rss: mem.rss,
         starttime: starttime
-      });
-    }
-    if (pathname === "/who") {
+      };
+      return res.simpleJSON(200, response_json);
+    } else if (pathname === "/who") {
       nicks = [];
       for (_i = 0, _len = sessions.length; _i < _len; _i++) {
         session = sessions[_i];
@@ -309,14 +312,13 @@
         session = sessions[id];
         nicks.push(session.nick);
       }
-      res.simpleJSON(200, {
+      return res.simpleJSON(200, {
         nicks: nicks,
         rss: mem.rss
       });
-    }
-    if (match = pathname.match(/\/tmp\/(.*)/)) {
+    } else if (match = pathname.match(/\/tmp\/(.*)/)) {
       filename = match[1];
-      fs.readFile("tmp/" + qs.unescape(filename), "binary", function(err, file) {
+      return fs.readFile("tmp/" + qs.unescape(filename), "binary", function(err, file) {
         if (err) {
           console.log(err);
           res.writeHead(404, {
@@ -330,8 +332,7 @@
         res.write(file, "binary");
         return res.end();
       });
-    }
-    if (req.url === "/" || req.url === "/style.css" || req.url === "/client.js" || req.url === "/jquery-1.2.6.min.js" || req.url === "/soundmanager2.js" || req.url === "/swf/soundmanager2.swf") {
+    } else if ((_ref = req.url, __indexOf.call(static_files, _ref) >= 0)) {
       uri = url.parse(req.url).pathname;
       filename = path.join(process.cwd(), uri);
       if (req.url === "/") {
@@ -350,6 +351,13 @@
         res.write(file, "binary");
         return res.end();
       });
+    } else {
+      res.writeHead(404, {
+        "Content-Type": "text/plain"
+      });
+      res.write("bad request" + req.url + "\n");
+      sys.puts("bad request" + req.url + "\n");
+      return res.end();
     }
   }).listen(Number(process.env.PORT || PORT), HOST);
 }).call(this);

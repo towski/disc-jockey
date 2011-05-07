@@ -4,7 +4,7 @@ PORT = 9817
 
 # when the daemon started
 starttime = (new Date).getTime()
-
+static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js"]
 ###
 var mem = process.memoryUsage()
 every 10 seconds poll for the memory.
@@ -47,18 +47,14 @@ class Channel
           text: text,
           timestamp: (new Date).getTime()
         }
-
     switch type
       when "msg" then sys.puts("<" + nick + "> " + text)
       when "join" then sys.puts(nick + " join")
       when "part" then sys.puts(nick + " part")
       when "upload" then @files.push text
-
     @messages.push( m )
-
     while (@callbacks.length > 0)
       @callbacks.shift().callback([m])
-
     while (@messages.length > MESSAGE_BACKLOG)
       @messages.shift()
 
@@ -67,7 +63,6 @@ class Channel
     for message in @messages
       if (message.timestamp > since)
         matching.push(message)
-
     if matching.length != 0
       callback matching
     else
@@ -138,7 +133,7 @@ http.createServer (req, res) ->
         channel.appendMessage(null, "upload", files.upload.name)
     return
 
-  if (req.url == '/form')
+  else if (req.url == '/form')
     # show a file upload form
     res.writeHead(200, {'content-type': 'text/html'})
     result = '<h2>Upload a Song (mp3)</h2>
@@ -149,7 +144,14 @@ http.createServer (req, res) ->
       </form>'
     res.end result
     
-  if (pathname == "/send")
+  else if req.url == '/submit_youtube_link' && req.method.toLowerCase() == 'post'
+    form = new formidable.IncomingForm()
+    form.parse req, (err, fields, files) ->
+      sys.puts "submitted youtube link"
+      channel.appendMessage(null, "youtube", fields.youtube)
+      res.end "ok"
+    
+  else if (pathname == "/send")
     id = qs.parse(url.parse(req.url).query).id
     text = qs.parse(url.parse(req.url).query).text
     session = sessions[id]
@@ -160,7 +162,7 @@ http.createServer (req, res) ->
     channel.appendMessage(session.nick, "msg", text)
     res.simpleJSON(200, { rss: mem.rss })
 
-  if req.url == '/cleanup'
+  else if req.url == '/cleanup'
     fs.readdir './tmp', (err, files) ->
       for file in files
         if file in channel.files
@@ -172,13 +174,13 @@ http.createServer (req, res) ->
       res.end "OK"
       return
     
-  if req.url == "/files"
+  else if req.url == "/files"
     fs.readdir './tmp', (err, files) ->
       res.writeHead(200, {'content-type': 'text/html'})
       res.end(new Buffer(JSON.stringify({files: files})))
     return
       
-  if req.url == "/load_files"
+  else if req.url == "/load_files"
     fs.readdir './tmp', (err, files) ->
       for file in files
         if file == ".gitignore"
@@ -188,7 +190,13 @@ http.createServer (req, res) ->
     res.end "OK"
     return
   
-  if pathname == "/recv"
+  else if req.url == "/load_file"
+    channel.appendMessage(null, "upload", file)
+    res.writeHead(200, {'content-type': 'text/html'})
+    res.end "OK"
+    return
+  
+  else if pathname == "/recv"
     if !qs.parse(url.parse(req.url).query).since
       res.simpleJSON(400, { error: "Must supply since parameter" })
       return
@@ -202,14 +210,14 @@ http.createServer (req, res) ->
         session.poke()
       res.simpleJSON(200, { messages: messages, rss: mem.rss })
   
-  if (pathname == "/part")
+  else if (pathname == "/part")
     id = qs.parse(url.parse(req.url).query).id
     if (id && sessions[id])
       session = sessions[id]
       session.destroy()
     res.simpleJSON(200, { rss: mem.rss })
   
-  if (pathname == "/join")
+  else if (pathname == "/join")
     nick = qs.parse(url.parse(req.url).query).nick
     if (nick == null || nick.length == 0)
       res.simpleJSON(400, {error: "Bad nick."})
@@ -218,15 +226,11 @@ http.createServer (req, res) ->
     if session == null
       res.simpleJSON(400, {error: "Nick in use"})
       return
-    #sys.puts("connection: " + nick + "@" + res.connection.remoteAddress)
     channel.appendMessage(session.nick, "join")
-    res.simpleJSON(200, { id: session.id
-                        , nick: session.nick
-                        , rss: mem.rss
-                        , starttime: starttime
-                        })
+    response_json = { id: session.id, nick: session.nick, rss: mem.rss, starttime: starttime }
+    res.simpleJSON(200, response_json)
   
-  if pathname == "/who"
+  else if pathname == "/who"
     nicks = []
     for session in sessions
       if (!sessions.hasOwnProperty(id)) 
@@ -235,7 +239,7 @@ http.createServer (req, res) ->
       nicks.push(session.nick)
     res.simpleJSON(200, { nicks: nicks, rss: mem.rss})
   
-  if match = pathname.match(/\/tmp\/(.*)/)
+  else if match = pathname.match(/\/tmp\/(.*)/)
     filename = match[1]
     fs.readFile "tmp/" + qs.unescape(filename), "binary", (err, file) ->
       if(err)
@@ -248,7 +252,7 @@ http.createServer (req, res) ->
       res.write(file, "binary")  
       res.end()  
   
-  if (req.url == "/" || req.url == "/style.css" || req.url == "/client.js" || req.url == "/jquery-1.2.6.min.js" || req.url == "/soundmanager2.js" || req.url == "/swf/soundmanager2.swf")
+  else if (req.url in static_files)
     uri = url.parse(req.url).pathname  
     filename = path.join(process.cwd(), uri)
     if (req.url == "/")
@@ -263,5 +267,10 @@ http.createServer (req, res) ->
       res.write(file, "binary")  
       res.end()
   
+  else
+    res.writeHead(404, {"Content-Type": "text/plain"})  
+    res.write("bad request" + req.url + "\n")  
+    sys.puts("bad request" + req.url + "\n")
+    res.end()
 .listen(Number(process.env.PORT || PORT), HOST)
 
