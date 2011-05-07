@@ -169,16 +169,15 @@
     return songFinishCallback();
   };
   window.skipCurrentSong = function() {
-    var currentSong;
-    if (currentSong) {
-      currentSong.stop();
-      currentSong.destruct();
-      currentSong = null;
+    if (window.currentSong) {
+      window.currentSong.stop();
+      window.currentSong.destruct();
+      window.currentSong = null;
     }
     return songFinishCallback();
   };
   window.songFinishCallback = function() {
-    var currentSong, playback_started, song;
+    var playback_started, song;
     if (window.local_playback) {
       song = window.songs[0];
       window.songs = window.songs.splice(1, window.songs.length);
@@ -186,7 +185,7 @@
       if (song) {
         $('#song_list li:first-child').remove();
         $('#current_song').html(song.text);
-        currentSong = soundManager.createSound({
+        window.currentSong = soundManager.createSound({
           id: song.text,
           url: "/tmp/" + escape(song.text),
           onfinish: songFinishCallback

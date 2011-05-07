@@ -206,10 +206,10 @@ window.enableLocalPlayback = () ->
   songFinishCallback()
 
 window.skipCurrentSong = () ->
-  if(currentSong)
-    currentSong.stop()
-    currentSong.destruct()
-    currentSong = null
+  if(window.currentSong)
+    window.currentSong.stop()
+    window.currentSong.destruct()
+    window.currentSong = null
   songFinishCallback()
 
 window.songFinishCallback = () ->
@@ -220,7 +220,7 @@ window.songFinishCallback = () ->
     if(song)
       $('#song_list li:first-child').remove()
       $('#current_song').html(song.text)
-      currentSong = soundManager.createSound({
+      window.currentSong = soundManager.createSound({
         id: song.text,
         url:"/tmp/" + escape(song.text),
         onfinish:songFinishCallback
