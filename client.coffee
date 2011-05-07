@@ -384,7 +384,7 @@ $(document).ready () ->
   $("#youtube_form").submit () ->
     try
       ajax_params = { 
-        cache: false, type: "POST", dataType: "json", url: "/submit_youtube_link", data: { nick: 'hey' }, 
+        cache: false, type: "POST", dataType: "json", url: "/submit_youtube_link", data: $("#youtube_form").serialize(), 
         error: (response) ->
           console.log(response)
         success: ->
@@ -396,7 +396,7 @@ $(document).ready () ->
   
   params = { allowScriptAccess: "always" }
   atts = { id: "myytplayer" }
-  swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "1", "1", "8", null, null, params, atts)
+  swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "100", "100", "8", null, null, params, atts)
 
   if (CONFIG.debug)
     $("#loading").hide()

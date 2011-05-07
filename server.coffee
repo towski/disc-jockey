@@ -4,7 +4,7 @@ PORT = 9817
 
 # when the daemon started
 starttime = (new Date).getTime()
-static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js"]
+static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js"]
 ###
 var mem = process.memoryUsage()
 every 10 seconds poll for the memory.
@@ -22,6 +22,7 @@ formidable = require("formidable")
 http = require("http")
 path = require("path")
 fs = require("fs")
+util = require("util")
 
 MESSAGE_BACKLOG = 200
 SESSION_TIMEOUT = 60 * 1000
@@ -147,8 +148,12 @@ http.createServer (req, res) ->
   else if req.url == '/submit_youtube_link' && req.method.toLowerCase() == 'post'
     form = new formidable.IncomingForm()
     form.parse req, (err, fields, files) ->
-      sys.puts "submitted youtube link"
-      channel.appendMessage(null, "youtube", fields.youtube)
+      match = fields.youtube_link.match /// ^ (
+        http://www.youtube.com/watch\?v=([^&]*)
+      ) ///
+      if match
+        sys.puts "submitted youtube link #{match[2]}"
+        channel.appendMessage(null, "youtube", match[2])
       res.end "ok"
     
   else if (pathname == "/send")
@@ -269,8 +274,8 @@ http.createServer (req, res) ->
   
   else
     res.writeHead(404, {"Content-Type": "text/plain"})  
-    res.write("bad request" + req.url + "\n")  
-    sys.puts("bad request" + req.url + "\n")
+    res.write("bad request" + req.url)  
+    sys.puts("bad request" + req.url)
     res.end()
 .listen(Number(process.env.PORT || PORT), HOST)
 

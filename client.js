@@ -1,5 +1,5 @@
 (function() {
-  var CONFIG, addMessage, longPoll, nicks, onConnect, outputUsers, rss, scrollDown, send, showChat, showConnect, showLoad, starttime, updateRSS, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
+  var CONFIG, addMessage, first_poll, longPoll, nicks, onConnect, outputUsers, rss, scrollDown, send, showChat, showConnect, showLoad, starttime, transmission_errors, updateRSS, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
   CONFIG = {
     debug: false,
     nick: "#",
@@ -182,15 +182,13 @@
             userPart(message.nick, message.timestamp);
             break;
           case "youtube":
-            if (ytswf) {
-              ytswf.loadVideoById(message.text);
-            }
-            console.log('youtube');
+            $('#song_list').append("<li>youtube video " + message.text + "</li>");
+            window.media_queue.queueYoutube(message.text);
             break;
           case "upload":
             addMessage("room", "uploaded " + message.text, message.timestamp, "join");
             $('#song_list').append("<li>" + message.text + "</li>");
-            startPlayback(message);
+            window.media_queue.queueMP3(message.text);
         }
       }
       updateTitle();
@@ -214,7 +212,6 @@
         return setTimeout(longPoll, 10 * 1000);
       },
       success: function(data) {
-        var transmission_errors;
         transmission_errors = 0;
         return longPoll(data);
       }
@@ -347,9 +344,7 @@
           type: "POST",
           dataType: "json",
           url: "/submit_youtube_link",
-          data: {
-            nick: 'hey'
-          },
+          data: $("#youtube_form").serialize(),
           error: function(response) {
             return console.log(response);
           },
@@ -367,7 +362,7 @@
     atts = {
       id: "myytplayer"
     };
-    swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "1", "1", "8", null, null, params, atts);
+    swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "100", "100", "8", null, null, params, atts);
     if (CONFIG.debug) {
       $("#loading").hide();
       $("#connect").hide();
