@@ -34,48 +34,49 @@
        }
     </script>
     
-    <div id="app">
-      <div id="connect" style="position:fixed; right:600px; border: 1px solid;">
-        <form action="#">
-          <fieldset> 
-
-            <h2>Login</h2>
-            <input id="nickInput" class="text"type="text" name="nick" value=""/>
-            <input id="connectButton" class="button" type="submit" name="" value="Join"/>
-
-          </fieldset>
-        </form>
-      </div>
-      <div id="loading" style="position:fixed; display:none"><p>loading</p></div>
+    <div id="app" style='margin:auto; width: 900px; margin-top:100px'>
       
-      <div style="position:fixed; width:400px; right:0px; border: 1px solid;">
-        <b>current song:</b>
+      <div id="activity">
+        <h2> Activity </h2>
+        <div id="log">
+        </div>
+        <div id="toolbar">
+          <ul id="status">
+            <li><a id="usersLink" href="#">? users</a></li>
+            <li>uptime: <span id="uptime">?</span></li>
+          </ul>
+          <input tabindex="1" type="text" id="entry" style='display:none'/>
+        </div>
+        <div id="connect" >
+          <form action="#">
+            <fieldset> 
+              <input id="nickInput" class="text"type="text" name="nick" value=""/>
+              <input id="connectButton" class="button" type="submit" name="" value="Join"/>
+            </fieldset>
+          </form>
+        </div>
+        <div id="loading" style="position:fixed; display:none"><p>loading</p></div>
+      </div>
+      <div style="border: 1px solid; width:600px;">
+        <a id='toggle_playback' onclick='if(local_playback){ stopLocalPlayback(); $("#toggle_playback").html("Play") } else { enableLocalPlayback(); $("#toggle_playback").html("Stop") }; return false' href='#'>Play</a>
+        <a onclick='skipCurrentSong()' href='#' onclick='return false'>Skip</a>
+        <h2>Currently</h2>
         <span id='current_song'></span>
         <br/>
-        <b>song queue:</b>
+        <h2>Queue</h2>
         <ul id='song_list'>
         </ul>
       </div>
-      <div style="position:fixed; right:500px; top:300px; border: 1px solid;">
+      <div style="border: 1px solid;">
         <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
       </div>
-      <div style="position:fixed; right:500px; top:200px; border: 1px solid;">
+      <div style="border: 1px solid;">
         <form action="/submit_youtube_link" id='youtube_form' method="post" onsubmit='return false;'>
+          <h2>Submit a youtube link</h2>
           <input type="text" name="youtube link" style="float:left">
           <input type="submit" value="submit" style="float:left">
+          hey
         </form>
-      </div>
-      <div id="log">
-      </div>
-      <div id="toolbar">
-        <ul id="status">
-          <li><a id="usersLink" href="#">? users</a></li>
-          <li>uptime: <span id="uptime">?</span></li>
-          <li>memory: <span id="rss">?</span>mb RSS</li>
-          <li><a id='toggle_playback' onclick='if(local_playback){ stopLocalPlayback(); $("#toggle_playback").html("Play") } else { enableLocalPlayback(); $("#toggle_playback").html("Stop") }; return false' href='#'>Play</a></li>
-          <li><a onclick='skipCurrentSong()' href='#' onclick='return false'>Skip current song</a></li>
-        </ul>
-        <input tabindex="1" type="text" id="entry"/>
       </div>
       <div id="ytapiplayer">
         You need Flash player 9+ and JavaScript enabled to view this video.

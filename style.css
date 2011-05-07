@@ -38,6 +38,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #loading { z-index: 10000000; }
 #connect { z-index: 10000001; }
+#activity { z-index: 10000001; }
 
 #loading p, #connect fieldset  {
   font-family: DejaVu Sans Mono, fixed; 
@@ -45,11 +46,13 @@ a:hover { text-decoration: underline; color: #aaa; }
   border: 0;
 }
 
+#activity {  
+  float:right;
+  background:white;
+}
+
 #toolbar {
-  position: fixed;
   color: #fff;
-  width: 100%; 
-  bottom: 0;
   background: #733;
 }
 
@@ -64,11 +67,14 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #log {
+  width: 300px;
+  border: 1px solid;
   display: block;
+  height: 60%;
   /* enough padding to clear the toolbar.. is there a better way to do this? */
-  padding-bottom: 5.1em; 
+  padding-bottom: 1em; 
   background: inherit;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 /* not very important info */
