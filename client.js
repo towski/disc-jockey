@@ -73,7 +73,7 @@
     for (_i = 0, _len = nicks.length; _i < _len; _i++) {
       nick = nicks[_i];
       if (nick === parting) {
-        nicks.splice(i, 1);
+        nicks.splice(_i, 1);
         break;
       }
     }

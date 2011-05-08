@@ -73,7 +73,7 @@ userPart = (parting, timestamp) ->
   #remove the user from the list
   for nick in nicks
     if (nick == parting)
-      nicks.splice(i,1)
+      nicks.splice(_i,1)
       break
   #update the UI
   updateUsersLink()
