@@ -71,6 +71,8 @@ a:hover { text-decoration: underline; color: #aaa; }
   top:55px;
   bottom:55px;
   overflow:scroll;
+  left:0;
+  right:0;
 }
 
 #toolbar {
@@ -135,4 +137,12 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #usersLink {
   color: inherit;
+}
+
+#left > div {
+  border-bottom:1px solid black;
+}
+
+#left div:last-child {
+  border:none;
 }
