@@ -219,10 +219,11 @@
         res.writeHead(200, {
           'content-type': 'text/html'
         });
-        res.end("OK");
+        return res.end("OK");
       });
-    } else if (req.url === "/files") {
-      fs.readdir('./tmp', function(err, files) {
+    } else if (req.url.match(/^\/files/)) {
+      return fs.readdir('./tmp', function(err, files) {
+        files = files.splice(1, files.length);
         res.writeHead(200, {
           'content-type': 'text/html'
         });
@@ -230,29 +231,15 @@
           files: files
         })));
       });
-    } else if (req.url === "/load_files") {
-            fs.readdir('./tmp', function(err, files) {
-        var file, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = files.length; _i < _len; _i++) {
-          file = files[_i];
-          if (file === ".gitignore") {
-            continue;
-          }
-          _results.push(channel.appendMessage(null, "upload", file));
-        }
-        return _results;
+    } else if (req.url === "/submit_file") {
+      form = new formidable.IncomingForm();
+      return form.parse(req, function(err, fields, files) {
+        channel.appendMessage(null, "upload", fields.song_selection);
+        res.writeHead(200, {
+          'content-type': 'text/html'
+        });
+        return res.end("OK");
       });
-      res.writeHead(200, {
-        'content-type': 'text/html'
-      });
-      res.end("OK");;
-    } else if (req.url === "/load_file") {
-            channel.appendMessage(null, "upload", file);
-      res.writeHead(200, {
-        'content-type': 'text/html'
-      });
-      res.end("OK");;
     } else if (pathname === "/recv") {
       if (!qs.parse(url.parse(req.url).query).since) {
         res.simpleJSON(400, {

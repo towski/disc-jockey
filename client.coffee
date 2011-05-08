@@ -385,14 +385,28 @@ $(document).ready () ->
     try
       ajax_params = { 
         cache: false, type: "POST", dataType: "json", url: "/submit_youtube_link", data: $("#youtube_form").serialize(), 
-        error: (response) ->
-          console.log(response)
         success: ->
       }
       $.ajax ajax_params
     catch error
       alert error
     return false
+  
+  ajax_params = { 
+    cache: false, type: "get", dataType: "json", url: "/files", 
+    success: (response) ->
+      for file in response.files
+        $('#song_selection').append("<option value='#{file}'>#{file}</option>")
+  }
+  $.ajax ajax_params
+  
+  $("#submit_song").submit () ->
+    ajax_params = { 
+      type: "post", dataType: "json", url: "/submit_file", data: $("#submit_song").serialize(), 
+      success: (response) ->
+        console.log(response)
+    }
+    $.ajax ajax_params
   
   params = { allowScriptAccess: "always" }
   atts = { id: "myytplayer" }

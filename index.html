@@ -75,6 +75,15 @@
         </ul>
       </div>
       <div style="border: 1px solid;">
+        <h2>Select from the library:</h2>
+        <form action="/submit_song" id='submit_song' method="post" onsubmit='return false;'>
+          <select name='song_selection' id='song_selection' style="float:left; width:200px;">
+            <option value=''></option>
+          </select>
+          <input type="submit" value="submit" style="float:left"> &nbsp;
+        </form>
+      </div>
+      <div style="border: 1px solid;">
         <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
       </div>
       <div style="border: 1px solid;">

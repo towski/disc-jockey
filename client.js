@@ -291,7 +291,7 @@
     }, "json");
   };
   $(document).ready(function() {
-    var atts, params;
+    var ajax_params, atts, params;
     $("#entry").keypress(function(e) {
       var msg;
       if (e.keyCode !== 13) {
@@ -345,9 +345,6 @@
           dataType: "json",
           url: "/submit_youtube_link",
           data: $("#youtube_form").serialize(),
-          error: function(response) {
-            return console.log(response);
-          },
           success: function() {}
         };
         $.ajax(ajax_params);
@@ -355,6 +352,35 @@
         alert(error);
       }
       return false;
+    });
+    ajax_params = {
+      cache: false,
+      type: "get",
+      dataType: "json",
+      url: "/files",
+      success: function(response) {
+        var file, _i, _len, _ref, _results;
+        _ref = response.files;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          file = _ref[_i];
+          _results.push($('#song_selection').append("<option value='" + file + "'>" + file + "</option>"));
+        }
+        return _results;
+      }
+    };
+    $.ajax(ajax_params);
+    $("#submit_song").submit(function() {
+      ajax_params = {
+        type: "post",
+        dataType: "json",
+        url: "/submit_file",
+        data: $("#submit_song").serialize(),
+        success: function(response) {
+          return console.log(response);
+        }
+      };
+      return $.ajax(ajax_params);
     });
     params = {
       allowScriptAccess: "always"

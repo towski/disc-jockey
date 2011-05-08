@@ -177,29 +177,19 @@ http.createServer (req, res) ->
           fs.unlink './tmp/' + file
       res.writeHead(200, {'content-type': 'text/html'})
       res.end "OK"
-      return
     
-  else if req.url == "/files"
+  else if req.url.match(/^\/files/)
     fs.readdir './tmp', (err, files) ->
+      files = files.splice(1, files.length)
       res.writeHead(200, {'content-type': 'text/html'})
       res.end(new Buffer(JSON.stringify({files: files})))
-    return
-      
-  else if req.url == "/load_files"
-    fs.readdir './tmp', (err, files) ->
-      for file in files
-        if file == ".gitignore"
-          continue
-        channel.appendMessage(null, "upload", file)
-    res.writeHead(200, {'content-type': 'text/html'})
-    res.end "OK"
-    return
   
-  else if req.url == "/load_file"
-    channel.appendMessage(null, "upload", file)
-    res.writeHead(200, {'content-type': 'text/html'})
-    res.end "OK"
-    return
+  else if req.url == "/submit_file"
+    form = new formidable.IncomingForm()
+    form.parse req, (err, fields, files) ->
+      channel.appendMessage(null, "upload", fields.song_selection)
+      res.writeHead(200, {'content-type': 'text/html'})
+      res.end "OK"
   
   else if pathname == "/recv"
     if !qs.parse(url.parse(req.url).query).since
