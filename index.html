@@ -87,7 +87,7 @@
           </ul>
         </div>
         <div id="select-from-library">
-          <h2>Select from the library:</h2>
+          <h2>&nbsp;Select from the library:</h2>
           <form action="/submit_song" id='submit_song' method="post" onsubmit='return false;'>
             <select name='song_selection' id='song_selection' style="float:left; width:200px;">
               <option value=''></option>
@@ -102,7 +102,7 @@
         <div>
           <a href='http://www.youtube.com/results' style='float:right;margin-right:100px;' onclick='this.href = "http://www.youtube.com/results"; this.href = this.href +"?search_query="+ $("#youtube_search")[0].value' target="_blank">youtube search</a>
           <input type="text" id='youtube_search' name="search" style="float:right; width:100px;">
-          <h2>Submit a youtube link</h2>
+          <h2>&nbsp;Submit a youtube link</h2>
         </div>
         <form action="/submit_youtube_link" id='youtube_form' method="post" onsubmit='return false;'>
           <input type="text" name="youtube_link" style="float:left; width:300px;">
