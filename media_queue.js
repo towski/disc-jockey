@@ -9,11 +9,14 @@
       this.local_playback = false;
     }
     MediaQueue.prototype.queueYoutube = function(array) {
-      return this.songs = this.songs.concat({
+      this.songs = this.songs.concat({
         type: 'youtube',
         vid: array.text,
         id: array.id
       });
+      if (this.local_playback && !this.playback_started) {
+        return this.playNext();
+      }
     };
     MediaQueue.prototype.queueMP3 = function(array) {
       var song;
@@ -23,6 +26,9 @@
         id: array.id
       };
       this.songs = this.songs.concat(song);
+      if (this.local_playback && !this.playback_started) {
+        this.playNext();
+      }
       return song;
     };
     MediaQueue.prototype.clearCurrentSong = function() {
@@ -44,12 +50,16 @@
       song = this.songs[0];
       this.songs = this.songs.splice(1, this.songs.length);
       if (song) {
-        $('#song_list li:first-child').remove();
+        setTimeout(function() {
+          return $('#song_list li:first-child').remove();
+        }, 0);
         if (song.type === 'youtube') {
           return this.readyVideoPlayer(song);
         } else if (song.type === 'mp3') {
           return this.playSong(song);
         }
+      } else {
+        return this.playback_started = false;
       }
     };
     MediaQueue.prototype.readyVideoPlayer = function(song) {
@@ -104,50 +114,6 @@
       } else {
         this.enableLocalPlayback();
         return $("#toggle_playback").html("Stop");
-      }
-    };
-    MediaQueue.prototype.songFinishCallback = function() {
-      var song;
-      if (this.currentSong) {
-        this.currentSong.destruct();
-        this.currentSong = null;
-      }
-      if (this.local_playback) {
-        song = this.songs[0];
-        this.songs = this.songs.splice(1, this.songs.length);
-        if (song) {
-          $('#song_list li:first-child').remove();
-          $('#current_song').html(song.text);
-          this.currentSong = soundManager.createSound({
-            id: song.text,
-            url: "/tmp/" + escape(song.text),
-            onfinish: this.songFinishCallback
-          });
-          return soundManager.play(song.text);
-        } else {
-          $('#current_song').html("");
-          return this.playback_started = false;
-        }
-      }
-    };
-    MediaQueue.prototype.startPlayback = function(message) {
-      var first_song, startSong;
-      if (!this.playback_started && this.local_playback) {
-        this.playback_started = true;
-        first_song = message;
-        startSong = function() {
-          $('#song_list li:first-child').remove();
-          $('#current_song').html(first_song.text);
-          this.currentSong = soundManager.createSound({
-            id: first_song.text,
-            url: "/tmp/" + escape(first_song.text),
-            onfinish: this.songFinishCallback
-          });
-          return this.currentSong.play(first_song.text);
-        };
-        return soundManager.onready(startSong);
-      } else {
-        return this.songs = this.songs.concat(message);
       }
     };
     MediaQueue.prototype.removeSongs = function(id) {
