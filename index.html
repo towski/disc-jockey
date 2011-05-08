@@ -44,7 +44,7 @@
     </script>
     
     
-    <div id="app" style='margin:auto; width: 900px; margin-top:100px'>
+    <div id="app">
       
       <div id="activity">
         <h2> Activity </h2>
@@ -56,45 +56,50 @@
             <li>uptime: <span id="uptime">?</span></li>
           </ul>
           <input tabindex="1" type="text" id="entry" style='display:none'/>
+          
+          <div id="connect" style="float:left">
+            <form action="#">
+              <fieldset> 
+                <input id="nickInput" class="text"type="text" name="nick" value=""/>
+                <input id="connectButton" class="button" type="submit" name="" value="Join"/>
+              </fieldset>
+            </form>
+          </div>
+          
         </div>
-        <div id="connect" >
-          <form action="#">
-            <fieldset> 
-              <input id="nickInput" class="text"type="text" name="nick" value=""/>
-              <input id="connectButton" class="button" type="submit" name="" value="Join"/>
-            </fieldset>
-          </form>
-        </div>
+
         <div id="loading" style="position:fixed; display:none"><p>loading</p></div>
       </div>
-      <div id="currently" style="border: 1px solid; width:600px;height: 400;">
-        <a id='toggle_playback' onclick='media_queue.togglePlayback(); return false' href='#'>Play</a>
-        <a onclick='media_queue.skipCurrentSong()' href='#' onclick='return false'>Skip</a>
-        <h2>Currently</h2>
-        <div id='youtube_mother' style='display:none'>
-          <div id="ytapiplayer">
-            You need Flash player 9+ and JavaScript enabled to view this video.
+
+      <div id="left">
+        <div id="current-queue">
+          <a id='toggle_playback' onclick='media_queue.togglePlayback(); return false' href='#'>Play</a>
+          <a onclick='media_queue.skipCurrentSong()' href='#' onclick='return false'>Skip</a>
+          <h2>Currently</h2>
+          <div id='youtube_mother' style='display:none'>
+            <div id="ytapiplayer">
+              You need Flash player 9+ and JavaScript enabled to view this video.
+            </div>
           </div>
+          <span id='current_song'></span>
+          <br/>
+          <h2>Queue</h2>
+          <ul id='song_list'>
+          </ul>
         </div>
-        <span id='current_song'></span>
-        <br/>
-        <h2>Queue</h2>
-        <ul id='song_list'>
-        </ul>
-      </div>
-      <div style="border: 1px solid;">
-        <h2>Select from the library:</h2>
-        <form action="/submit_song" id='submit_song' method="post" onsubmit='return false;'>
-          <select name='song_selection' id='song_selection' style="float:left; width:200px;">
-            <option value=''></option>
-          </select>
-          <input type="submit" value="submit" style="float:left"> &nbsp;
-        </form>
-      </div>
-      <div style="border: 1px solid;">
-        <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
-      </div>
-      <div style="border: 1px solid;">
+        <div id="select-from-library">
+          <h2>Select from the library:</h2>
+          <form action="/submit_song" id='submit_song' method="post" onsubmit='return false;'>
+            <select name='song_selection' id='song_selection' style="float:left; width:200px;">
+              <option value=''></option>
+            </select>
+            <input type="submit" value="submit" style="float:left"> &nbsp;
+          </form>
+        </div>
+        <div id="upload-song">
+          <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
+        </div>
+        <div id="add-from-youtube">
         <div>
           <a href='http://www.youtube.com/results' style='float:right;margin-right:100px;' onclick='this.href = "http://www.youtube.com/results"; this.href = this.href +"?search_query="+ $("#youtube_search")[0].value' target="_blank">youtube search</a>
           <input type="text" id='youtube_search' name="search" style="float:right; width:100px;">
@@ -104,6 +109,8 @@
           <input type="text" name="youtube_link" style="float:left; width:300px;">
           <input type="submit" value="submit" style="float:left"> &nbsp;
         </form>
+      </div>
+        <div style="clear:both"></div>
       </div>
     </div>
   </body>

@@ -42,19 +42,44 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #loading p, #connect fieldset  {
   font-family: DejaVu Sans Mono, fixed; 
-  width: 10em;
   border: 0;
 }
 
+#app {
+  position:relative;
+  width:900px;
+  margin:100px auto;
+}
+
+#left {
+  width:60%;
+  border:1px solid black; 
+}
+
 #activity {  
-  float:right;
-  background:white;
-  border: 1px solid;
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:60%;
+  overflow:hidden;
+  border:1px solid black;
+}
+
+#log {
+  position:absolute;
+  top:55px;
+  bottom:55px;
+  overflow:scroll;
 }
 
 #toolbar {
-  color: #fff;
-  background: #733;
+  background: none repeat scroll 0 0 #773333;
+  bottom: 0;
+  color: #FFFFFF;
+  left: 0;
+  position: absolute;
+  right: 0;
 }
 
 #entry {
@@ -63,19 +88,16 @@ a:hover { text-decoration: underline; color: #aaa; }
   margin: 0;
   border-width: 0;
   outline-width: 0;
-  clear: both;
+  height:40px;
   line-height: 3em;
 }
 
-#log {
-  width: 300px;
-  display: block;
-  height: 60%;
-  /* enough padding to clear the toolbar.. is there a better way to do this? */
-  padding-bottom: 1em; 
-  background: inherit;
-  overflow: scroll;
+#song_list {
+  height:30%;
+  overflow:scroll;
 }
+
+
 
 /* not very important info */
 .notice td, .join td, .part td, .message .date { color: #555; }
