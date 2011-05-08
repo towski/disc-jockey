@@ -167,13 +167,10 @@ http.createServer (req, res) ->
     channel.appendMessage(session.nick, "msg", text)
     res.simpleJSON(200, { rss: mem.rss })
 
-  else if req.url == '/cleanup'
+  else if req.url == '/cleanup_bad_files'
     fs.readdir './tmp', (err, files) ->
       for file in files
-        if file in channel.files
-          sys.puts "keeping " + file
-        else
-          sys.puts "deleting " + file
+        if !file.match(/^.gitignore$|\.mp3$/)
           fs.unlink './tmp/' + file
       res.writeHead(200, {'content-type': 'text/html'})
       res.end "OK"

@@ -204,15 +204,12 @@
       return res.simpleJSON(200, {
         rss: mem.rss
       });
-    } else if (req.url === '/cleanup') {
+    } else if (req.url === '/cleanup_bad_files') {
       return fs.readdir('./tmp', function(err, files) {
         var file, _i, _len;
         for (_i = 0, _len = files.length; _i < _len; _i++) {
           file = files[_i];
-          if (__indexOf.call(channel.files, file) >= 0) {
-            sys.puts("keeping " + file);
-          } else {
-            sys.puts("deleting " + file);
+          if (!file.match(/^.gitignore$|\.mp3$/)) {
             fs.unlink('./tmp/' + file);
           }
         }
