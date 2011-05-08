@@ -364,7 +364,7 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           file = _ref[_i];
-          _results.push($('#song_selection').append("<option value='" + file + "'>" + file + "</option>"));
+          _results.push($('#song_selection').append("<option value='" + (escape(file)) + "'>" + file + "</option>"));
         }
         return _results;
       }

@@ -184,7 +184,7 @@ http.createServer (req, res) ->
   else if req.url == "/submit_file"
     form = new formidable.IncomingForm()
     form.parse req, (err, fields, files) ->
-      channel.appendMessage(null, "upload", fields.song_selection)
+      channel.appendMessage(null, "upload", unescape(fields.song_selection))
       res.writeHead(200, {'content-type': 'text/html'})
       res.end "OK"
   

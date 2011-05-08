@@ -396,7 +396,7 @@ $(document).ready () ->
     cache: false, type: "get", dataType: "json", url: "/files", 
     success: (response) ->
       for file in response.files
-        $('#song_selection').append("<option value='#{file}'>#{file}</option>")
+        $('#song_selection').append("<option value='#{escape(file)}'>#{file}</option>")
   }
   $.ajax ajax_params
   
