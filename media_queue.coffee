@@ -43,7 +43,8 @@ class MediaQueue
     @currentSong = soundManager.createSound({
       id: song.file,
       url:"/tmp/" + escape(song.file),
-      onfinish: @playNext
+      onfinish: => 
+        @playNext()
     })
     console.log(@currentSong.type)
     @currentSong.type = "mp3"

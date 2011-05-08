@@ -57,7 +57,9 @@
       this.currentSong = soundManager.createSound({
         id: song.file,
         url: "/tmp/" + escape(song.file),
-        onfinish: this.playNext
+        onfinish: __bind(function() {
+          return this.playNext();
+        }, this)
       });
       console.log(this.currentSong.type);
       this.currentSong.type = "mp3";
