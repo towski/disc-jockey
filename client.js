@@ -194,7 +194,6 @@
           case "upload":
             addMessage("room", "uploaded " + message.text, message.timestamp, "join");
             song = window.media_queue.queueMP3(message);
-            $('#song_list').append("<li>" + message.text + "<a href='#' onclick='window.media_queue.removeSongs(" + message.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
         }
       }
       updateTitle();
@@ -365,12 +364,12 @@
       dataType: "json",
       url: "/files",
       success: function(response) {
-        var file, _i, _len, _ref, _results;
+        var song, _i, _len, _ref, _results;
         _ref = response.files;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          file = _ref[_i];
-          _results.push($('#song_selection').append("<option value='" + (escape(file)) + "'>" + file + "</option>"));
+          song = _ref[_i];
+          _results.push($('#song_selection').append("<option value='" + (escape(song.file)) + "'>" + song.artist + " - " + song.album + " - " + song.title + "</option>"));
         }
         return _results;
       }

@@ -18,14 +18,11 @@
         return this.playNext();
       }
     };
-    MediaQueue.prototype.queueMP3 = function(array) {
-      var song;
-      song = {
-        type: 'mp3',
-        file: array.text,
-        id: array.id
-      };
+    MediaQueue.prototype.queueMP3 = function(song) {
+      song.type = 'mp3';
+      song.file = song.text;
       this.songs = this.songs.concat(song);
+      $('#song_list').append("<li>" + song.artist + " - " + song.album + " - " + song.title + " <a href='#' onclick='window.media_queue.removeSongs(" + song.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
       if (this.local_playback && !this.playback_started) {
         this.playNext();
       }
@@ -70,7 +67,7 @@
       return ytswf.loadVideoById(this.currentSong.vid);
     };
     MediaQueue.prototype.playSong = function(song) {
-      $('#current_song').html(song.file);
+      $('#current_song').html("" + song.artist + " - " + song.album + " - " + song.title);
       this.currentSong = soundManager.createSound({
         id: song.file,
         url: "/tmp/" + escape(song.file),
@@ -79,7 +76,6 @@
           return this.playNext();
         }, this)
       });
-      console.log(this.currentSong.type);
       this.currentSong.type = "mp3";
       return soundManager.play(song.file);
     };
@@ -121,8 +117,6 @@
       songs = this.songs.filter(function(obj) {
         return obj.id === id;
       });
-      console.log(songs);
-      console.log(id);
       _results = [];
       for (_i = 0, _len = songs.length; _i < _len; _i++) {
         song = songs[_i];

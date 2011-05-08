@@ -10,9 +10,11 @@ class MediaQueue
     if @local_playback && !@playback_started
       @playNext()
   
-  queueMP3: (array) ->
-    song = {type: 'mp3', file: array.text, id: array.id}
+  queueMP3: (song) ->
+    song.type = 'mp3'
+    song.file = song.text
     @songs = @songs.concat(song)
+    $('#song_list').append("<li>#{song.artist} - #{song.album} - #{song.title} <a href='#' onclick='window.media_queue.removeSongs(#{song.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     if @local_playback && !@playback_started
       @playNext()
     return song
@@ -51,7 +53,7 @@ class MediaQueue
     ytswf.loadVideoById(@currentSong.vid)
       
   playSong: (song) ->
-    $('#current_song').html(song.file)
+    $('#current_song').html("#{song.artist} - #{song.album} - #{song.title}")
     @currentSong = soundManager.createSound({
       id: song.file,
       url:"/tmp/" + escape(song.file),
@@ -59,7 +61,6 @@ class MediaQueue
         @clearCurrentSong()
         @playNext()
     })
-    console.log(@currentSong.type)
     @currentSong.type = "mp3"
     soundManager.play(song.file)
   
@@ -97,8 +98,6 @@ class MediaQueue
   removeSongs: (id) ->
     songs = @songs.filter (obj) ->
       obj.id == id
-    console.log(songs)
-    console.log(id)
     for song in songs
       @songs.remove(@songs.indexOf(song))
     

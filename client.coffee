@@ -234,7 +234,6 @@ longPoll = (data) ->
         when "upload"
           addMessage("room", "uploaded " + message.text, message.timestamp, "join")
           song = window.media_queue.queueMP3(message)
-          $('#song_list').append("<li>#{message.text}<a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     #update the document title to include unread message count if blurred
     updateTitle()
 
@@ -403,8 +402,8 @@ $(document).ready () ->
   ajax_params = { 
     cache: false, type: "get", dataType: "json", url: "/files", 
     success: (response) ->
-      for file in response.files
-        $('#song_selection').append("<option value='#{escape(file)}'>#{file}</option>")
+      for song in response.files
+        $('#song_selection').append("<option value='#{escape(song.file)}'>#{song.artist} - #{song.album} - #{song.title}</option>")
   }
   $.ajax ajax_params
   

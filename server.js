@@ -1,5 +1,5 @@
 (function() {
-  var Channel, HOST, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, index, mem, path, qs, sessions, starttime, static_files, sys, url, util;
+  var Channel, HOST, ID3, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, index, mem, path, qs, sessions, starttime, static_files, sys, url, util;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
     for (var i = 0, l = this.length; i < l; i++) {
       if (this[i] === item) return i;
@@ -29,6 +29,7 @@
   path = require("path");
   fs = require("fs");
   util = require("util");
+  ID3 = require("id3");
   MESSAGE_BACKLOG = 200;
   SESSION_TIMEOUT = 60 * 1000;
   Channel = (function() {
@@ -48,8 +49,8 @@
       }, this);
       setInterval(clearCallbacks, 3000);
     }
-    Channel.prototype.appendMessage = function(nick, type, text) {
-      var m, _results;
+    Channel.prototype.appendMessage = function(nick, type, text, options) {
+      var key, m, value, _results;
       m = {
         nick: nick,
         type: type,
@@ -57,6 +58,12 @@
         timestamp: (new Date).getTime(),
         id: index
       };
+      if (options) {
+        for (key in options) {
+          value = options[key];
+          m[key] = value;
+        }
+      }
       index += 1;
       switch (type) {
         case "msg":
@@ -155,9 +162,30 @@
       });
       return res.end(body);
     };
+    res.tag_file = function(filename, callback) {
+      return fs.readFile("tmp/" + filename, function(err, data) {
+        var id3_3v2, id3_tags;
+        if (err) {
+          throw err;
+        }
+        id3_3v2 = new ID3(data);
+        id3_3v2.parse();
+        id3_tags = {
+          title: id3_3v2.get('title'),
+          album: id3_3v2.get('album'),
+          artist: id3_3v2.get('artist')
+        };
+        callback(id3_tags);
+        return fs.open("tags/" + filename, "w+", 0666, function(err, fd) {
+          var buffer;
+          buffer = new Buffer(JSON.stringify(id3_tags));
+          return fs.write(fd, buffer, 0, buffer.length);
+        });
+      });
+    };
     if (req.url === '/upload' && req.method.toLowerCase() === 'post') {
-            form = new formidable.IncomingForm();
-      form.parse(req, function(err, fields, files) {
+      form = new formidable.IncomingForm();
+      return form.parse(req, function(err, fields, files) {
         var result;
         res.writeHead(200, {
           'content-type': 'text/html'
@@ -166,10 +194,13 @@
         res.end(result);
         if (files.upload && files.upload.name.match(/mp3/i)) {
           sys.puts("file upload " + files.upload.name);
-          fs.rename(files.upload.path, 'tmp/' + files.upload.name);
-          return channel.appendMessage(null, "upload", files.upload.name);
+          return fs.rename(files.upload.path, "tmp/" + files.upload.name, function() {
+            return res.tag_file(files.upload.name, function(id3_tags) {
+              return channel.appendMessage(null, "upload", files.upload.name, id3_tags);
+            });
+          });
         }
-      });;
+      });
     } else if (req.url === '/form') {
       res.writeHead(200, {
         'content-type': 'text/html'
@@ -221,20 +252,50 @@
         });
         return res.end("OK");
       });
-    } else if (req.url.match(/^\/files/)) {
+    } else if (req.url === '/tag_all_files') {
       return fs.readdir('./tmp', function(err, files) {
+        var file, _i, _len;
         files.splice(files.indexOf(".gitignore"), 1);
+        for (_i = 0, _len = files.length; _i < _len; _i++) {
+          file = files[_i];
+          res.tag_file(file, function() {});
+        }
+        res.writeHead(200, {
+          'content-type': 'text/html'
+        });
+        return res.end("OK");
+      });
+    } else if (req.url.match(/^\/files/)) {
+      return fs.readdir('./tags', function(err, files) {
+        var data, file, file_data, _i, _len;
+        files.splice(files.indexOf(".gitignore"), 1);
+        file_data = [];
+        for (_i = 0, _len = files.length; _i < _len; _i++) {
+          file = files[_i];
+          data = fs.readFileSync("tags/" + file);
+          try {
+            data = JSON.parse(data);
+            data.file = file;
+            file_data = file_data.concat(data);
+          } catch (error) {
+
+          }
+        }
         res.writeHead(200, {
           'content-type': 'text/html'
         });
         return res.end(new Buffer(JSON.stringify({
-          files: files
+          files: file_data
         })));
       });
     } else if (req.url === "/submit_file") {
       form = new formidable.IncomingForm();
       return form.parse(req, function(err, fields, files) {
-        channel.appendMessage(null, "upload", unescape(fields.song_selection));
+        var song_file;
+        song_file = unescape(fields.song_selection);
+        fs.readFile("tags/" + song_file, null, function(err, data) {
+          return channel.appendMessage(null, "upload", song_file, JSON.parse(data));
+        });
         res.writeHead(200, {
           'content-type': 'text/html'
         });

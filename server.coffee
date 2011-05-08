@@ -24,6 +24,7 @@ http = require("http")
 path = require("path")
 fs = require("fs")
 util = require("util")
+ID3 = require("id3")
 
 MESSAGE_BACKLOG = 200
 SESSION_TIMEOUT = 60 * 1000
@@ -42,7 +43,7 @@ class Channel
       
     setInterval clearCallbacks, 3000
 
-  appendMessage: (nick, type, text) ->
+  appendMessage: (nick, type, text, options) ->
     m = { 
           nick: nick, 
           type: type, # "msg", "join", "part"
@@ -50,6 +51,10 @@ class Channel
           timestamp: (new Date).getTime(),
           id:   index
         }
+    if options
+      for key, value of options 
+        m[key] = value
+    
     index += 1
     switch type
       when "msg" then sys.puts("<" + nick + "> " + text)
@@ -116,6 +121,22 @@ http.createServer (req, res) ->
     body = new Buffer(JSON.stringify(obj))
     res.writeHead(code, { "Content-Type": "text/json", "Content-Length": body.length})
     res.end(body)
+    
+  res.tag_file = (filename, callback) ->
+    fs.readFile "tmp/#{filename}", (err, data) ->
+      if err
+        throw err
+      id3_3v2 = new ID3(data)
+      id3_3v2.parse();
+      id3_tags = {
+        title: id3_3v2.get('title'),
+        album: id3_3v2.get('album'),
+        artist: id3_3v2.get('artist')
+      }
+      callback(id3_tags)
+      fs.open "tags/#{filename}", "w+", 0666, (err, fd) ->
+        buffer = new Buffer(JSON.stringify(id3_tags))
+        fs.write fd, buffer, 0, buffer.length
   
   if req.url == '/upload' && req.method.toLowerCase() == 'post'
     # parse a file upload
@@ -133,9 +154,9 @@ http.createServer (req, res) ->
       res.end result 
       if files.upload && files.upload.name.match(/mp3/i)
         sys.puts("file upload " + files.upload.name)
-        fs.rename(files.upload.path, 'tmp/' + files.upload.name)
-        channel.appendMessage(null, "upload", files.upload.name)
-    return
+        fs.rename files.upload.path, "tmp/#{files.upload.name}", ->
+          res.tag_file files.upload.name, (id3_tags) ->
+            channel.appendMessage(null, "upload", files.upload.name, id3_tags)
 
   else if (req.url == '/form')
     # show a file upload form
@@ -177,17 +198,35 @@ http.createServer (req, res) ->
           fs.unlink './tmp/' + file
       res.writeHead(200, {'content-type': 'text/html'})
       res.end "OK"
-    
-  else if req.url.match(/^\/files/)
+      
+  else if req.url == '/tag_all_files'
     fs.readdir './tmp', (err, files) ->
       files.splice(files.indexOf(".gitignore"), 1)
+      for file in files
+        res.tag_file file, ->
       res.writeHead(200, {'content-type': 'text/html'})
-      res.end(new Buffer(JSON.stringify({files: files})))
+      res.end "OK"
+    
+  else if req.url.match(/^\/files/)
+    fs.readdir './tags', (err, files) ->
+      files.splice(files.indexOf(".gitignore"), 1)
+      file_data = []
+      for file in files
+        data = fs.readFileSync("tags/#{file}")
+        try
+          data = JSON.parse(data)
+          data.file = file
+          file_data = file_data.concat data
+        catch error
+      res.writeHead(200, {'content-type': 'text/html'})
+      res.end(new Buffer(JSON.stringify({files: file_data})))
   
   else if req.url == "/submit_file"
     form = new formidable.IncomingForm()
     form.parse req, (err, fields, files) ->
-      channel.appendMessage(null, "upload", unescape(fields.song_selection))
+      song_file = unescape(fields.song_selection)
+      fs.readFile "tags/#{song_file}", null, (err, data) ->
+        channel.appendMessage null, "upload", song_file, JSON.parse(data)
       res.writeHead(200, {'content-type': 'text/html'})
       res.end "OK"
   
