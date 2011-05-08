@@ -13,6 +13,7 @@ setInterval(function () {
 }, 10*1000)
 ###
 mem = {rss:'100'}
+index = 1
 
 
 sys = require("sys")
@@ -46,8 +47,10 @@ class Channel
           nick: nick, 
           type: type, # "msg", "join", "part"
           text: text,
-          timestamp: (new Date).getTime()
+          timestamp: (new Date).getTime(),
+          id:   index
         }
+    index += 1
     switch type
       when "msg" then sys.puts("<" + nick + "> " + text)
       when "join" then sys.puts(nick + " join")

@@ -8,17 +8,22 @@
       this.currentSong = null;
       this.local_playback = false;
     }
-    MediaQueue.prototype.queueYoutube = function(vid) {
+    MediaQueue.prototype.queueYoutube = function(array) {
       return this.songs = this.songs.concat({
         type: 'youtube',
-        vid: vid
+        vid: array.text,
+        id: array.id
       });
     };
-    MediaQueue.prototype.queueMP3 = function(file) {
-      return this.songs = this.songs.concat({
+    MediaQueue.prototype.queueMP3 = function(array) {
+      var song;
+      song = {
         type: 'mp3',
-        file: file
-      });
+        file: array.text,
+        id: array.id
+      };
+      this.songs = this.songs.concat(song);
+      return song;
     };
     MediaQueue.prototype.clearCurrentSong = function() {
       if (this.currentSong) {
@@ -144,6 +149,20 @@
       } else {
         return this.songs = this.songs.concat(message);
       }
+    };
+    MediaQueue.prototype.removeSongs = function(id) {
+      var song, songs, _i, _len, _results;
+      songs = this.songs.filter(function(obj) {
+        return obj.id === id;
+      });
+      console.log(songs);
+      console.log(id);
+      _results = [];
+      for (_i = 0, _len = songs.length; _i < _len; _i++) {
+        song = songs[_i];
+        _results.push(this.songs.remove(this.songs.indexOf(song)));
+      }
+      return _results;
     };
     return MediaQueue;
   })();

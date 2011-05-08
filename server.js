@@ -1,5 +1,5 @@
 (function() {
-  var Channel, HOST, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, mem, path, qs, sessions, starttime, static_files, sys, url, util;
+  var Channel, HOST, MESSAGE_BACKLOG, PORT, SESSION_TIMEOUT, channel, createSession, formidable, fs, http, index, mem, path, qs, sessions, starttime, static_files, sys, url, util;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
     for (var i = 0, l = this.length; i < l; i++) {
       if (this[i] === item) return i;
@@ -20,6 +20,7 @@
   mem = {
     rss: '100'
   };
+  index = 1;
   sys = require("sys");
   url = require("url");
   qs = require("querystring");
@@ -53,8 +54,10 @@
         nick: nick,
         type: type,
         text: text,
-        timestamp: (new Date).getTime()
+        timestamp: (new Date).getTime(),
+        id: index
       };
+      index += 1;
       switch (type) {
         case "msg":
           sys.puts("<" + nick + "> " + text);

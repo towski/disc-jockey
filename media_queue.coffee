@@ -5,11 +5,13 @@ class MediaQueue
     @currentSong = null
     @local_playback = false
 
-  queueYoutube: (vid) ->
-    @songs = @songs.concat({type: 'youtube', vid: vid})
+  queueYoutube: (array) ->
+    @songs = @songs.concat({type: 'youtube', vid: array.text, id: array.id})
   
-  queueMP3: (file) ->
-    @songs = @songs.concat({type: 'mp3', file: file})
+  queueMP3: (array) ->
+    song = {type: 'mp3', file: array.text, id: array.id}
+    @songs = @songs.concat(song)
+    return song
   
   clearCurrentSong: ->
     if @currentSong
@@ -118,5 +120,13 @@ class MediaQueue
       soundManager.onready(startSong)
     else
       @songs = @songs.concat(message)
-      
+    
+  removeSongs: (id) ->
+    songs = @songs.filter (obj) ->
+      obj.id == id
+    console.log(songs)
+    console.log(id)
+    for song in songs
+      @songs.remove(@songs.indexOf(song))
+    
 window.MediaQueue = MediaQueue

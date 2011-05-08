@@ -9,6 +9,12 @@
     unread: 0
   };
   nicks = [];
+  Array.prototype.remove = function(from, to) {
+    var rest;
+    rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+  };
   Date.prototype.toRelativeTime = function(now_threshold) {
     var conversions, delta, key, units, _i, _len;
     delta = new Date() - this;
@@ -152,7 +158,7 @@
   transmission_errors = 0;
   first_poll = true;
   longPoll = function(data) {
-    var message, rss, _i, _len, _ref;
+    var message, rss, song, _i, _len, _ref;
     if (transmission_errors > 2) {
       showConnect();
       return;
@@ -182,13 +188,13 @@
             userPart(message.nick, message.timestamp);
             break;
           case "youtube":
-            $('#song_list').append("<li>youtube video " + message.text + "</li>");
-            window.media_queue.queueYoutube(message.text);
+            $('#song_list').append("<li>youtube video " + message.text + " <a href='#' onclick='window.media_queue.removeSongs(" + message.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
+            window.media_queue.queueYoutube(message);
             break;
           case "upload":
             addMessage("room", "uploaded " + message.text, message.timestamp, "join");
-            $('#song_list').append("<li>" + message.text + "</li>");
-            window.media_queue.queueMP3(message.text);
+            song = window.media_queue.queueMP3(message);
+            $('#song_list').append("<li>" + message.text + "<a href='#' onclick='window.media_queue.removeSongs(" + message.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
         }
       }
       updateTitle();

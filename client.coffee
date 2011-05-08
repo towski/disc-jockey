@@ -8,6 +8,14 @@ CONFIG = { debug: false
 
 nicks = []
 
+Array.prototype.remove = (from, to) ->
+  rest = this.slice((to || from) + 1 || this.length);
+  this.length = if from < 0 
+    this.length + from 
+  else
+    from
+  return this.push.apply(this, rest);
+
 Date.prototype.toRelativeTime = (now_threshold) ->
   delta = new Date() - this
 
@@ -221,12 +229,12 @@ longPoll = (data) ->
         when "join" then userJoin(message.nick, message.timestamp)
         when "part" then userPart(message.nick, message.timestamp)
         when "youtube"
-          $('#song_list').append("<li>youtube video "+message.text+"</li>")
-          window.media_queue.queueYoutube(message.text)
+          $('#song_list').append("<li>youtube video #{message.text} <a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
+          window.media_queue.queueYoutube(message)
         when "upload"
           addMessage("room", "uploaded " + message.text, message.timestamp, "join")
-          $('#song_list').append("<li>"+message.text+"</li>")
-          window.media_queue.queueMP3(message.text)
+          song = window.media_queue.queueMP3(message)
+          $('#song_list').append("<li>#{message.text}<a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     #update the document title to include unread message count if blurred
     updateTitle()
 
