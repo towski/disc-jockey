@@ -223,7 +223,7 @@
       });
     } else if (req.url.match(/^\/files/)) {
       return fs.readdir('./tmp', function(err, files) {
-        files = files.splice(1, files.length);
+        files.splice(files.indexOf(".gitignore"), 1);
         res.writeHead(200, {
           'content-type': 'text/html'
         });

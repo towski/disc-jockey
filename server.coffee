@@ -180,7 +180,7 @@ http.createServer (req, res) ->
     
   else if req.url.match(/^\/files/)
     fs.readdir './tmp', (err, files) ->
-      files = files.splice(1, files.length)
+      files.splice(files.indexOf(".gitignore"), 1)
       res.writeHead(200, {'content-type': 'text/html'})
       res.end(new Buffer(JSON.stringify({files: files})))
   
