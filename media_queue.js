@@ -58,6 +58,7 @@
         id: song.file,
         url: "/tmp/" + escape(song.file),
         onfinish: __bind(function() {
+          this.clearCurrentSong();
           return this.playNext();
         }, this)
       });

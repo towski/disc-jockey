@@ -44,6 +44,7 @@ class MediaQueue
       id: song.file,
       url:"/tmp/" + escape(song.file),
       onfinish: => 
+        @clearCurrentSong()
         @playNext()
     })
     console.log(@currentSong.type)
