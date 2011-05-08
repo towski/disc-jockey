@@ -27,6 +27,7 @@
           this.currentSong.destruct();
           $('#current_song').html("");
         } else if (this.currentSong.type === "youtube") {
+          console.log("hiding");
           $("#youtube_mother").hide();
         }
         return this.currentSong = null;
@@ -34,6 +35,7 @@
     };
     MediaQueue.prototype.playNext = function() {
       var song;
+      console.log("playing next");
       song = this.songs[0];
       this.songs = this.songs.splice(1, this.songs.length);
       if (song) {

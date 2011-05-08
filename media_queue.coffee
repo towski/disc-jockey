@@ -18,10 +18,12 @@ class MediaQueue
         @currentSong.destruct()
         $('#current_song').html("")
       else if @currentSong.type == "youtube"
+        console.log("hiding")
         $("#youtube_mother").hide()
       @currentSong = null
         
   playNext: () ->
+    console.log("playing next")
     song = @songs[0]
     @songs = @songs.splice(1, @songs.length)
     if song
