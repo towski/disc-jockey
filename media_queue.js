@@ -54,6 +54,8 @@
             soundcloud_player.api_stop();
           }
           this.soundcloud_song_loaded = false;
+          $('#myPlayer')[0].width = "1px";
+          $('#myPlayer')[0].height = "1px";
         }
         return this.currentSong = null;
       }
@@ -89,6 +91,8 @@
       if (!this.soundcloud_song_loaded) {
         this.soundcloud_song_loaded = true;
         console.log("api load " + media_queue.currentSong.url);
+        $('#myPlayer')[0].width = "100%";
+        $('#myPlayer')[0].height = "61px";
         return soundcloud_player.api_load(media_queue.currentSong.url);
       } else {
         return soundcloud_player.api_play();

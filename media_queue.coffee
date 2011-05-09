@@ -39,6 +39,8 @@ class MediaQueue
         if @sound_cloud_registered
           soundcloud_player.api_stop()
         @soundcloud_song_loaded = false
+        $('#myPlayer')[0].width = "1px"
+        $('#myPlayer')[0].height = "1px"
       @currentSong = null
         
   playNext: () ->
@@ -69,6 +71,8 @@ class MediaQueue
     if !@soundcloud_song_loaded
       @soundcloud_song_loaded = true
       console.log("api load #{media_queue.currentSong.url}")
+      $('#myPlayer')[0].width = "100%"
+      $('#myPlayer')[0].height = "61px"
       soundcloud_player.api_load(media_queue.currentSong.url)
     else
       soundcloud_player.api_play()
