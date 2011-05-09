@@ -54,7 +54,6 @@
             soundcloud_player.api_stop();
           }
           this.soundcloud_song_loaded = false;
-          $('#soundcloud').hide();
         }
         return this.currentSong = null;
       }
@@ -87,8 +86,9 @@
       return ytswf.loadVideoById(this.currentSong.vid);
     };
     MediaQueue.prototype.loadCurrentSoundCloud = function() {
-      if (this.soundcloud_song_loaded) {
+      if (!this.soundcloud_song_loaded) {
         this.soundcloud_song_loaded = true;
+        console.log("api load " + media_queue.currentSong.url);
         return soundcloud_player.api_load(media_queue.currentSong.url);
       } else {
         return soundcloud_player.api_play();
@@ -100,7 +100,7 @@
         this.soundcloud_started = true;
         return startSoundCloud(song.url);
       } else {
-        return $('#soundcloud').show();
+        return this.loadCurrentSoundCloud();
       }
     };
     MediaQueue.prototype.playSong = function(song) {

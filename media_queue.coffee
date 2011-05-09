@@ -38,8 +38,7 @@ class MediaQueue
       else if @currentSong.type == "soundcloud"
         if @sound_cloud_registered
           soundcloud_player.api_stop()
-        @soundcloud_song_loaded = false  
-        $('#soundcloud').hide()
+        @soundcloud_song_loaded = false
       @currentSong = null
         
   playNext: () ->
@@ -67,8 +66,9 @@ class MediaQueue
     ytswf.loadVideoById(@currentSong.vid)
     
   loadCurrentSoundCloud: () ->
-    if @soundcloud_song_loaded
+    if !@soundcloud_song_loaded
       @soundcloud_song_loaded = true
+      console.log("api load #{media_queue.currentSong.url}")
       soundcloud_player.api_load(media_queue.currentSong.url)
     else
       soundcloud_player.api_play()
@@ -79,7 +79,7 @@ class MediaQueue
       @soundcloud_started = true
       startSoundCloud(song.url)
     else
-      $('#soundcloud').show()
+      @loadCurrentSoundCloud()
       
   playSong: (song) ->
     $('#current_song').html("#{song.artist} - #{song.album} - #{song.title}")

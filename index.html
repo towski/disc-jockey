@@ -39,7 +39,9 @@
       }
       
       soundcloud.addEventListener('onPlayerError', function(player, data) {
-        console.error('track couldnt be loaded!');
+        soundcloud_player = soundcloud.getPlayer('myPlayer');
+        media_queue.sound_cloud_registered = true;
+        media_queue.loadCurrentSoundCloud();
       });
       
       //playSoundCloud("http://api.soundcloud.com/tracks/7304162?secret_token=s-B6qh7")
