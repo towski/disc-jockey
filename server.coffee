@@ -144,7 +144,7 @@ http.createServer (req, res) ->
     form.parse req, (err, fields, files) ->
       res.writeHead(200, {'content-type': 'text/html'})
       result = '''
-        <h2>Upload a Song (mp3)</h2>
+        <h3>Upload a Song (mp3)</h3>
         <form action="/upload" enctype="multipart/form-data" method="post">
         <input type="text" name="title" style="float:left">
         <input type="file" name="upload" multiple="multiple" style="float:left">
@@ -161,7 +161,7 @@ http.createServer (req, res) ->
   else if (req.url == '/form')
     # show a file upload form
     res.writeHead(200, {'content-type': 'text/html'})
-    result = '<h2>Upload a Song (mp3)</h2>
+    result = '<h3>Upload a Song (mp3)</h3>
       <form action="/upload" enctype="multipart/form-data" method="post">
       <input type="text" name="title" style="float:left">
       <input type="file" name="upload" multiple="multiple" style="float:left">

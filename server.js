@@ -190,7 +190,7 @@
         res.writeHead(200, {
           'content-type': 'text/html'
         });
-        result = '<h2>Upload a Song (mp3)</h2>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="text" name="title" style="float:left">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
+        result = '<h3>Upload a Song (mp3)</h3>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="text" name="title" style="float:left">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
         res.end(result);
         if (files.upload && files.upload.name.match(/mp3/i)) {
           sys.puts("file upload " + files.upload.name);
@@ -205,7 +205,7 @@
       res.writeHead(200, {
         'content-type': 'text/html'
       });
-      result = '<h2>Upload a Song (mp3)</h2>\
+      result = '<h3>Upload a Song (mp3)</h3>\
       <form action="/upload" enctype="multipart/form-data" method="post">\
       <input type="text" name="title" style="float:left">\
       <input type="file" name="upload" multiple="multiple" style="float:left">\
