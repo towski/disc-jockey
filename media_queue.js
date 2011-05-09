@@ -53,6 +53,7 @@
           if (this.sound_cloud_registered) {
             soundcloud_player.api_stop();
           }
+          this.soundcloud_song_loaded = false;
           $('#soundcloud').hide();
         }
         return this.currentSong = null;

@@ -38,6 +38,7 @@ class MediaQueue
       else if @currentSong.type == "soundcloud"
         if @sound_cloud_registered
           soundcloud_player.api_stop()
+        @soundcloud_song_loaded = false  
         $('#soundcloud').hide()
       @currentSong = null
         
