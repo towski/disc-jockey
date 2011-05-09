@@ -44,6 +44,10 @@
         media_queue.loadCurrentSoundCloud();
       });
       
+      soundcloud.addEventListener('onMediaEnd', function(player, data) {
+        media_queue.skipCurrentSong();
+      });
+      
       //playSoundCloud("http://api.soundcloud.com/tracks/7304162?secret_token=s-B6qh7")
       function startSoundCloud(url){
         var flashvars = {
