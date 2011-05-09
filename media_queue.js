@@ -7,11 +7,23 @@
       this.playback_started = false;
       this.currentSong = null;
       this.local_playback = false;
+      this.soundcloud_started = false;
+      this.soundcloud_registered = false;
     }
     MediaQueue.prototype.queueYoutube = function(array) {
       this.songs = this.songs.concat({
         type: 'youtube',
         vid: array.text,
+        id: array.id
+      });
+      if (this.local_playback && !this.playback_started) {
+        return this.playNext();
+      }
+    };
+    MediaQueue.prototype.queueSoundCloud = function(array) {
+      this.songs = this.songs.concat({
+        type: 'soundcloud',
+        url: array.text,
         id: array.id
       });
       if (this.local_playback && !this.playback_started) {
@@ -37,6 +49,11 @@
         } else if (this.currentSong.type === "youtube") {
           console.log("hiding");
           $("#youtube_mother").hide();
+        } else if (this.currentSong.type === "soundcloud") {
+          if (this.sound_cloud_registered) {
+            soundcloud_player.api_stop();
+          }
+          $('#soundcloud').hide();
         }
         return this.currentSong = null;
       }
@@ -54,6 +71,8 @@
           return this.readyVideoPlayer(song);
         } else if (song.type === 'mp3') {
           return this.playSong(song);
+        } else if (song.type === 'soundcloud') {
+          return this.playSoundCloud(song);
         }
       } else {
         return this.playback_started = false;
@@ -65,6 +84,23 @@
     };
     MediaQueue.prototype.playCurrentVideo = function() {
       return ytswf.loadVideoById(this.currentSong.vid);
+    };
+    MediaQueue.prototype.loadCurrentSoundCloud = function() {
+      if (this.soundcloud_song_loaded) {
+        this.soundcloud_song_loaded = true;
+        return soundcloud_player.api_load(media_queue.currentSong.url);
+      } else {
+        return soundcloud_player.api_play();
+      }
+    };
+    MediaQueue.prototype.playSoundCloud = function(song) {
+      this.currentSong = song;
+      if (!this.soundcloud_started) {
+        this.soundcloud_started = true;
+        return startSoundCloud(song.url);
+      } else {
+        return $('#soundcloud').show();
+      }
     };
     MediaQueue.prototype.playSong = function(song) {
       $('#current_song').html("" + song.artist + " - " + song.album + " - " + song.title);

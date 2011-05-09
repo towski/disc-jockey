@@ -231,6 +231,9 @@ longPoll = (data) ->
         when "youtube"
           $('#song_list').append("<li>youtube video #{message.text} <a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
           window.media_queue.queueYoutube(message)
+        when "soundcloud"
+          $('#song_list').append("<li>soundcloud url #{message.text} <a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
+          window.media_queue.queueSoundCloud(message)
         when "upload"
           addMessage("room", "uploaded " + message.text, message.timestamp, "join")
           song = window.media_queue.queueMP3(message)
@@ -392,6 +395,17 @@ $(document).ready () ->
     try
       ajax_params = { 
         cache: false, type: "POST", dataType: "json", url: "/submit_youtube_link", data: $("#youtube_form").serialize(), 
+        success: ->
+      }
+      $.ajax ajax_params
+    catch error
+      alert error
+    return false
+    
+  $("#soundcloud_form").submit () ->
+    try
+      ajax_params = { 
+        cache: false, type: "POST", dataType: "json", url: "/submit_soundcloud_link", data: $("#soundcloud_form").serialize(), 
         success: ->
       }
       $.ajax ajax_params

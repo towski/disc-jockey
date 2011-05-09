@@ -4,9 +4,16 @@ class MediaQueue
     @playback_started = false
     @currentSong = null
     @local_playback = false
+    @soundcloud_started = false
+    @soundcloud_registered = false
 
   queueYoutube: (array) ->
     @songs = @songs.concat({type: 'youtube', vid: array.text, id: array.id})
+    if @local_playback && !@playback_started
+      @playNext()
+      
+  queueSoundCloud: (array) ->
+    @songs = @songs.concat({type: 'soundcloud', url: array.text, id: array.id})
     if @local_playback && !@playback_started
       @playNext()
   
@@ -28,6 +35,10 @@ class MediaQueue
       else if @currentSong.type == "youtube"
         console.log("hiding")
         $("#youtube_mother").hide()
+      else if @currentSong.type == "soundcloud"
+        if @sound_cloud_registered
+          soundcloud_player.api_stop()
+        $('#soundcloud').hide()
       @currentSong = null
         
   playNext: () ->
@@ -42,6 +53,8 @@ class MediaQueue
         @readyVideoPlayer(song)
       else if song.type == 'mp3'
         @playSong(song)
+      else if song.type == 'soundcloud'
+        @playSoundCloud(song)
     else
       @playback_started = false
   
@@ -51,6 +64,21 @@ class MediaQueue
   
   playCurrentVideo: ->   
     ytswf.loadVideoById(@currentSong.vid)
+    
+  loadCurrentSoundCloud: () ->
+    if @soundcloud_song_loaded
+      @soundcloud_song_loaded = true
+      soundcloud_player.api_load(media_queue.currentSong.url)
+    else
+      soundcloud_player.api_play()
+     
+  playSoundCloud: (song) ->
+    @currentSong = song
+    if !@soundcloud_started
+      @soundcloud_started = true
+      startSoundCloud(song.url)
+    else
+      $('#soundcloud').show()
       
   playSong: (song) ->
     $('#current_song').html("#{song.artist} - #{song.album} - #{song.title}")

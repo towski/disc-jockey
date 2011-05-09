@@ -9,7 +9,7 @@
   HOST = null;
   PORT = 9817;
   starttime = (new Date).getTime();
-  static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js"];
+  static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf"];
   /*
   var mem = process.memoryUsage()
   every 10 seconds poll for the memory.
@@ -221,6 +221,12 @@
           sys.puts("submitted youtube link " + match[2]);
           channel.appendMessage(null, "youtube", match[2]);
         }
+        return res.end("ok");
+      });
+    } else if (req.url === '/submit_soundcloud_link' && req.method.toLowerCase() === 'post') {
+      form = new formidable.IncomingForm();
+      return form.parse(req, function(err, fields, files) {
+        channel.appendMessage(null, "soundcloud", fields.soundcloud_link);
         return res.end("ok");
       });
     } else if (pathname === "/send") {
