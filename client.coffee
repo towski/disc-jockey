@@ -416,6 +416,16 @@ $(document).ready () ->
   ajax_params = { 
     cache: false, type: "get", dataType: "json", url: "/files", 
     success: (response) ->
+      songs = response.files.sort (obj1, obj2) ->
+        if obj1.artist == obj2.artist
+          if obj1.album > obj2.album
+            1
+          else
+            -1
+        else if obj1.artist > obj2.artist
+          1
+        else
+          -1
       for song in response.files
         $('#song_selection').append("<option value='#{escape(song.file)}'>#{song.artist} - #{song.album} - #{song.title}</option>")
   }
