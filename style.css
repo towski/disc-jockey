@@ -94,7 +94,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #song_list {
-  height:30%;
+  height:20%;
   overflow:scroll;
 }
 
