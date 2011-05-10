@@ -1,10 +1,7 @@
-HOST = null # localhost
-#PORT = 8003
-PORT = 9817
 
 # when the daemon started
 starttime = (new Date).getTime()
-static_files = ["/", "/style.css", "/client.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf"]
+static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf"]
 ###
 var mem = process.memoryUsage()
 every 10 seconds poll for the memory.
@@ -41,7 +38,7 @@ class Channel
       while @callbacks.length > 0 && now - @callbacks[0].timestamp > 30*1000
         @callbacks.shift().callback []
       
-    setInterval clearCallbacks, 3000
+    @clearCallbacksInterval = setInterval clearCallbacks, 3000
 
   appendMessage: (nick, type, text, options) ->
     m = { 
@@ -107,14 +104,14 @@ createSession = (nick) ->
   session
   
 # interval to kill off old sessions
-setInterval () ->
+sessionTimeout = setInterval () ->
   now = new Date
   for session in sessions
     if (now - session.timestamp > SESSION_TIMEOUT)
       session.destroy()
 , 1000
 
-http.createServer (req, res) ->
+exports.server = http.createServer (req, res) ->
   pathname = url.parse(req.url).pathname
   
   res.simpleJSON = (code, obj) ->
@@ -272,10 +269,9 @@ http.createServer (req, res) ->
   
   else if pathname == "/who"
     nicks = []
-    for session in sessions
-      if (!sessions.hasOwnProperty(id)) 
+    for session_id, session of sessions
+      if (!session.hasOwnProperty('id')) 
         continue
-      session = sessions[id]
       nicks.push(session.nick)
     res.simpleJSON(200, { nicks: nicks, rss: mem.rss})
   
@@ -312,5 +308,7 @@ http.createServer (req, res) ->
     res.write("bad request" + req.url)  
     sys.puts("bad request" + req.url)
     res.end()
-.listen(Number(process.env.PORT || PORT), HOST)
 
+exports.server.addListener 'close', ->
+  clearInterval sessionTimeout 
+  clearInterval channel.clearCallbacksInterval
