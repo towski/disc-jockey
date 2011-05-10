@@ -95,8 +95,9 @@
       </div>
       <div id="left">
         <div id="current-queue">
-          <a id='toggle_playback' onclick='media_queue.togglePlayback(); return false' href='#'>Play</a>
-          <a onclick='media_queue.skipCurrentSong()' href='#' onclick='return false'>Skip</a>
+          <a id='toggle_playback' onclick='media_queue.togglePlayback(); return false' href='#'>Play</a> |
+          <a onclick='media_queue.skipCurrentSong()' href='#' onclick='return false'>Skip</a> |
+          <a onclick="$('#song_list').children().remove(); media_queue.songs = []" href='#'>Clear Queue</a>
           <h2>Currently</h2>
           <div id="soundcloud">
             <div id="myContent">
