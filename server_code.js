@@ -188,7 +188,7 @@
         res.writeHead(200, {
           'content-type': 'text/html'
         });
-        result = '<h3>Upload a Song (mp3)</h3>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="text" name="title" style="float:left">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
+        result = '<h3>Upload a Song (mp3)</h3>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
         res.end(result);
         if (files.upload && files.upload.name.match(/mp3/i)) {
           sys.puts("file upload " + files.upload.name);
@@ -205,7 +205,6 @@
       });
       result = '<h3>Upload a Song (mp3)</h3>\
       <form action="/upload" enctype="multipart/form-data" method="post">\
-      <input type="text" name="title" style="float:left">\
       <input type="file" name="upload" multiple="multiple" style="float:left">\
       <input type="submit" value="Upload" style="float:left">\
       </form>';
@@ -216,7 +215,6 @@
         var match;
         match = fields.youtube_link.match(/^(http:\/\/www.youtube.com\/watch\?v=([^&]*))/);
         if (match) {
-          sys.puts("submitted youtube link " + match[2]);
           channel.appendMessage(null, "youtube", match[2]);
         }
         return res.end("ok");
@@ -297,13 +295,15 @@
       return form.parse(req, function(err, fields, files) {
         var song_file;
         song_file = unescape(fields.song_selection);
-        fs.readFile("tags/" + song_file, null, function(err, data) {
-          return channel.appendMessage(null, "upload", song_file, JSON.parse(data));
+        return fs.readFile("tags/" + song_file, null, function(err, data) {
+          if (err === null) {
+            channel.appendMessage(null, "upload", song_file, JSON.parse(data));
+          }
+          res.writeHead(200, {
+            'content-type': 'text/html'
+          });
+          return res.end("OK");
         });
-        res.writeHead(200, {
-          'content-type': 'text/html'
-        });
-        return res.end("OK");
       });
     } else if (pathname === "/recv") {
       if (!qs.parse(url.parse(req.url).query).since) {
@@ -415,9 +415,9 @@
       sys.puts("bad request" + req.url);
       return res.end();
     }
-  });
-  exports.server.addListener('close', function() {
+  }).addListener('close', function() {
     clearInterval(sessionTimeout);
     return clearInterval(channel.clearCallbacksInterval);
   });
+  exports.server.channel = channel;
 }).call(this);

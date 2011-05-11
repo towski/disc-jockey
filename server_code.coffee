@@ -143,7 +143,6 @@ exports.server = http.createServer (req, res) ->
       result = '''
         <h3>Upload a Song (mp3)</h3>
         <form action="/upload" enctype="multipart/form-data" method="post">
-        <input type="text" name="title" style="float:left">
         <input type="file" name="upload" multiple="multiple" style="float:left">
         <input type="submit" value="Upload" style="float:left">
         </form>
@@ -160,7 +159,6 @@ exports.server = http.createServer (req, res) ->
     res.writeHead(200, {'content-type': 'text/html'})
     result = '<h3>Upload a Song (mp3)</h3>
       <form action="/upload" enctype="multipart/form-data" method="post">
-      <input type="text" name="title" style="float:left">
       <input type="file" name="upload" multiple="multiple" style="float:left">
       <input type="submit" value="Upload" style="float:left">
       </form>'
@@ -173,7 +171,6 @@ exports.server = http.createServer (req, res) ->
         http://www.youtube.com/watch\?v=([^&]*)
       ) ///
       if match
-        sys.puts "submitted youtube link #{match[2]}"
         channel.appendMessage(null, "youtube", match[2])
       res.end "ok"
       
@@ -229,9 +226,10 @@ exports.server = http.createServer (req, res) ->
     form.parse req, (err, fields, files) ->
       song_file = unescape(fields.song_selection)
       fs.readFile "tags/#{song_file}", null, (err, data) ->
-        channel.appendMessage null, "upload", song_file, JSON.parse(data)
-      res.writeHead(200, {'content-type': 'text/html'})
-      res.end "OK"
+        if err == null
+          channel.appendMessage null, "upload", song_file, JSON.parse(data)
+        res.writeHead(200, {'content-type': 'text/html'})
+        res.end "OK"
   
   else if pathname == "/recv"
     if !qs.parse(url.parse(req.url).query).since
@@ -308,7 +306,8 @@ exports.server = http.createServer (req, res) ->
     res.write("bad request" + req.url)  
     sys.puts("bad request" + req.url)
     res.end()
-
-exports.server.addListener 'close', ->
+.addListener 'close', ->
   clearInterval sessionTimeout 
   clearInterval channel.clearCallbacksInterval
+  
+exports.server.channel = channel
