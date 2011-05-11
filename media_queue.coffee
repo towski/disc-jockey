@@ -1,4 +1,6 @@
-class MediaQueue
+exports = exports ? this
+  
+exports.MediaQueue = class MediaQueue
   constructor: ->
     @songs = []
     @playback_started = false
@@ -44,10 +46,10 @@ class MediaQueue
       @currentSong = null
         
   playNext: () ->
-    console.log("playing next")
     song = @songs[0]
     @songs = @songs.splice(1, @songs.length)
     if song
+      @playback_started = true
       setTimeout ->
         $('#song_list li:first-child').remove()
       , 0
@@ -70,10 +72,9 @@ class MediaQueue
   loadCurrentSoundCloud: () ->
     if !@soundcloud_song_loaded
       @soundcloud_song_loaded = true
-      console.log("api load #{media_queue.currentSong.url}")
       $('#myPlayer')[0].width = "100%"
       $('#myPlayer')[0].height = "61px"
-      soundcloud_player.api_load(media_queue.currentSong.url)
+      soundcloud_player.api_load(@currentSong.url)
     else
       soundcloud_player.api_play()
      
@@ -107,7 +108,6 @@ class MediaQueue
 
   enableLocalPlayback: ->
     @local_playback = true
-    @playback_started = true
     if(@currentSong)
       @currentSong.play()
     else
@@ -133,5 +133,3 @@ class MediaQueue
       obj.id == id
     for song in songs
       @songs.remove(@songs.indexOf(song))
-    
-window.MediaQueue = MediaQueue

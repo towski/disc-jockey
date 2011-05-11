@@ -1,7 +1,8 @@
 (function() {
-  var MediaQueue;
+  var MediaQueue, exports;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-  MediaQueue = (function() {
+  exports = exports != null ? exports : this;
+  exports.MediaQueue = MediaQueue = (function() {
     function MediaQueue() {
       this.songs = [];
       this.playback_started = false;
@@ -62,10 +63,10 @@
     };
     MediaQueue.prototype.playNext = function() {
       var song;
-      console.log("playing next");
       song = this.songs[0];
       this.songs = this.songs.splice(1, this.songs.length);
       if (song) {
+        this.playback_started = true;
         setTimeout(function() {
           return $('#song_list li:first-child').remove();
         }, 0);
@@ -90,10 +91,9 @@
     MediaQueue.prototype.loadCurrentSoundCloud = function() {
       if (!this.soundcloud_song_loaded) {
         this.soundcloud_song_loaded = true;
-        console.log("api load " + media_queue.currentSong.url);
         $('#myPlayer')[0].width = "100%";
         $('#myPlayer')[0].height = "61px";
-        return soundcloud_player.api_load(media_queue.currentSong.url);
+        return soundcloud_player.api_load(this.currentSong.url);
       } else {
         return soundcloud_player.api_play();
       }
@@ -132,7 +132,6 @@
     };
     MediaQueue.prototype.enableLocalPlayback = function() {
       this.local_playback = true;
-      this.playback_started = true;
       if (this.currentSong) {
         return this.currentSong.play();
       } else {
@@ -167,5 +166,4 @@
     };
     return MediaQueue;
   })();
-  window.MediaQueue = MediaQueue;
 }).call(this);
