@@ -35,10 +35,7 @@ module.exports = testCase({
   testWaitingYoutube: function(test){
     var queue = new media_queue.MediaQueue;
     queue.enableLocalPlayback();
-    queue.queueYoutube({
-      text: 123,
-      id: 1
-    });
+    queue.queueYoutube({ text: 123, id: 1 });
     test.equal(0, queue.songs.length)
     test.equal("youtube", queue.currentSong.type)
     test.ok(queue.playback_started)
