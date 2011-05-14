@@ -4,8 +4,9 @@
   sys = require("sys");
   MESSAGE_BACKLOG = 200;
   exports.Channel = Channel = (function() {
-    function Channel() {
+    function Channel(db) {
       var clearCallbacks;
+      this.db = db;
       this.index = 1;
       this.messages = [];
       this.callbacks = [];
@@ -30,6 +31,9 @@
         timestamp: (new Date).getTime(),
         id: this.index
       };
+      this.db.collection('messages', function(error, collection) {
+        return collection.insert(m);
+      });
       if (options) {
         for (key in options) {
           value = options[key];

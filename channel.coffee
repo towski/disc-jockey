@@ -1,7 +1,8 @@
 sys = require("sys")
 MESSAGE_BACKLOG = 200
 exports.Channel = class Channel
-  constructor: ->
+  constructor: (db) ->
+    @db = db
     @index = 1
     @messages = []
     @callbacks = []
@@ -23,6 +24,9 @@ exports.Channel = class Channel
           timestamp: (new Date).getTime(),
           id:   @index
         }
+        
+    @db.collection 'messages', (error, collection) -> 
+      collection.insert(m)
     if options
       for key, value of options 
         m[key] = value

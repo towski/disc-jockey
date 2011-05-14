@@ -1,10 +1,19 @@
 var
   //assert = require('assert'),
   http = require('http'),
-  hello = require('./server_code')
-  fs = require('fs')
+  hello = require('./server_code'),
+  fs = require('fs'),
+  mongodb = require('mongodb')
 
-hello.server.listen(9091);
+var server;
+
+exports.testSetup = function(test){
+  mongodb.connect(JSON.parse(fs.readFileSync('config_test.json')).mongo, function(error, db){
+    server = new hello.Server(db)
+    server.listen(9091, null);
+    test.done()
+  })
+}
 
 var client = http.createClient('9091')
 
@@ -55,21 +64,21 @@ exports.testWho = function(test){
 }
 
 exports.testSubmitBadYoutubeLink = function(test){
-  hello.server.channel.messages = [] 
+  //server.channel.messages = [] 
   var request = client.request('POST', '/submit_youtube_link', {"content-type":'urlencoded'}).on('response', function (response) {
     test.equal(200, response.statusCode);
   })
   request.write("youtube_link=a%2Cd")
   request.end()
-  test.deepEqual([], hello.server.channel.messages);
+  //test.deepEqual([], server.channel.messages);
   test.done(); 
 }
 
 exports.testSubmitGoodYoutubeLink = function(test){
-  hello.server.channel.messages = [] 
+  //server.channel.messages = [] 
   var request = client.request('POST', '/submit_youtube_link', {"content-type":'urlencoded'}).on('response', function (response) {
     test.equal(200, response.statusCode);
-    test.ok(hello.server.channel.messages.length > 0);
+    test.ok(server.channel.messages.length > 0);
     test.done();
   })
   request.write("youtube_link=" + escape("http://www.youtube.com/watch?v=Lv-GLbumJIA"))
@@ -77,10 +86,10 @@ exports.testSubmitGoodYoutubeLink = function(test){
 }
 
 exports.testSubmitSoundcloudLink = function(test){
-  hello.server.channel.messages = [] 
+  //server.channel.messages = [] 
   var request = client.request('POST', '/submit_soundcloud_link', {"content-type":'urlencoded'}).on('response', function (response) {
     test.equal(200, response.statusCode);
-    test.ok(hello.server.channel.messages.length > 0);
+    test.ok(server.channel.messages.length > 0);
     test.done();
   })
   request.write("soundcloud_link=" + escape("http://soundcloud.com/getter_dubstep/mt-eden-sierre-leone-getter"))
@@ -88,10 +97,10 @@ exports.testSubmitSoundcloudLink = function(test){
 }
 
 exports.testSubmitNonFile = function(test){
-  hello.server.channel.messages = [] 
+  server.channel.messages = [] 
   var request = client.request('POST', '/submit_file', {"content-type":'urlencoded'}).on('response', function (response) {
     test.equal(200, response.statusCode);
-    test.deepEqual([], hello.server.channel.messages);
+    test.deepEqual([], server.channel.messages);
     test.done();
   })
   request.write("song_selection=" + escape("01 Booger Pants.mp3"))
@@ -99,10 +108,10 @@ exports.testSubmitNonFile = function(test){
 }
 
 exports.testSubmitFile = function(test){
-  hello.server.channel.messages = []
+  server.channel.messages = []
   var request = client.request('POST', '/submit_file', {"content-type":'urlencoded'}).on('response', function (response) {
     test.equal(200, response.statusCode);
-    test.ok(hello.server.channel.messages.length > 0);
+    test.ok(server.channel.messages.length > 0);
     test.done();
   })
   request.write("song_selection=" + escape("01 Synthy.mp3"))
@@ -110,11 +119,10 @@ exports.testSubmitFile = function(test){
 }
 
 exports.testUploadFile = function(test){
-  hello.server.channel.messages = []
+  server.channel.messages = []
   fs.unlink("tmp/thefile.mp3")
   fs.unlink("tags/thefile.mp3")
   var fileCreated = false;  
-  var tagsCreated = false;
   var headers = {
     "Content-Type":"multipart/form-data; boundary=----randomstring1337"
   }
@@ -129,21 +137,13 @@ exports.testUploadFile = function(test){
   request.write('------randomstring1337--')
   request.end()
   fs.watchFile("tmp/thefile.mp3", function (curr, prev) {
-    fileCreated = true;
-    if(fileCreated && tagsCreated){
-      test.done()
-    }
+    test.done()
   });
-  fs.watchFile("tags/thefile.mp3", function (curr, prev) {
-    var tagsCreated = true;
-    if(fileCreated && tagsCreated){
-      test.done()
-    }
-  });
+  // test mongo data added
 }
 
 exports.testUploadMultipleFiles = function(test){
-  hello.server.channel.messages = []
+  server.channel.messages = []
   fs.unlink("tmp/thefile.mp3")
   fs.unlink("tags/thefile.mp3")
   fs.stat("boogoo")
@@ -159,7 +159,7 @@ exports.testUploadMultipleFiles = function(test){
   request.write('Content-Type: application/octet-stream"\r\n')
   request.write('\r\n')
   request.write('hey this is the file\r\n')
-  request.write('------randomstring1337')
+  request.write('------randomstring1337\r\n')
   request.write('Content-Disposition: form-data; name="upload"; filename="thefile2.mp3"\r\n')
   request.write('Content-Type: application/octet-stream"\r\n')
   request.write('\r\n')
