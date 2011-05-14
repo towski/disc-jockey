@@ -2,3 +2,5 @@ tmp/*
 tags/*
 .monitor
 .nodester.appconfig
+config.json
+config_test.json
