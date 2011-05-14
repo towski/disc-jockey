@@ -182,13 +182,6 @@ addMessage = (from, text, time, _class) ->
   #always view the most recent message when it is added
   scrollDown()
 
-updateRSS = () ->
-  bytes = parseInt(rss)
-  if (bytes)
-    megabytes = bytes / (1024*1024)
-    megabytes = Math.round(megabytes*10)/10
-    $("#rss").text(megabytes.toString())
-
 updateUptime = () ->
   if (starttime)
     $("#uptime").text(starttime.toRelativeTime())
@@ -206,10 +199,6 @@ longPoll = (data) ->
   if (transmission_errors > 2)
     showConnect()
     return
-
-  if (data && data.rss)
-    rss = data.rss
-    updateRSS()
 
   #process any updates we may have
   #data will be null on the first call of longPoll

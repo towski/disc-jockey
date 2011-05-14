@@ -1,5 +1,5 @@
 (function() {
-  var CONFIG, addMessage, first_poll, longPoll, nicks, onConnect, outputUsers, rss, scrollDown, send, showChat, showConnect, showLoad, starttime, transmission_errors, updateRSS, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
+  var CONFIG, addMessage, first_poll, longPoll, nicks, onConnect, outputUsers, rss, scrollDown, send, showChat, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
   CONFIG = {
     debug: false,
     nick: "#",
@@ -140,15 +140,6 @@
     $("#log").append(messageElement);
     return scrollDown();
   };
-  updateRSS = function() {
-    var bytes, megabytes;
-    bytes = parseInt(rss);
-    if (bytes) {
-      megabytes = bytes / (1024 * 1024);
-      megabytes = Math.round(megabytes * 10) / 10;
-      return $("#rss").text(megabytes.toString());
-    }
-  };
   updateUptime = function() {
     if (starttime) {
       return $("#uptime").text(starttime.toRelativeTime());
@@ -158,14 +149,10 @@
   transmission_errors = 0;
   first_poll = true;
   longPoll = function(data) {
-    var message, rss, song, _i, _len, _ref;
+    var message, song, _i, _len, _ref;
     if (transmission_errors > 2) {
       showConnect();
       return;
-    }
-    if (data && data.rss) {
-      rss = data.rss;
-      updateRSS();
     }
     if (data && data.messages) {
       _ref = data.messages;

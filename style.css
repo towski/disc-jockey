@@ -75,9 +75,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #toolbar {
-  background: none repeat scroll 0 0 #773333;
   bottom: 0;
-  color: #FFFFFF;
   left: 0;
   position: absolute;
   right: 0;
