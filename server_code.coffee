@@ -1,17 +1,6 @@
-
 # when the daemon started
 starttime = (new Date).getTime()
 static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf"]
-###
-var mem = process.memoryUsage()
-every 10 seconds poll for the memory.
-setInterval(function () {
-  mem = process.memoryUsage()
-}, 10*1000)
-###
-mem = {rss:'100'}
-index = 1
-
 
 sys = require("sys")
 url = require("url")
@@ -21,60 +10,12 @@ http = require("http")
 path = require("path")
 fs = require("fs")
 util = require("util")
+chan = require("./channel")
 ID3 = require("id3")
 
-MESSAGE_BACKLOG = 200
 SESSION_TIMEOUT = 60 * 1000
 
-class Channel
-  constructor: ->
-    @messages = []
-    @callbacks = []
-    @files = [".gitignore"]
-    # clear old callbacks
-    # they can hang around for at most 30 seconds.
-    clearCallbacks = =>
-      now = new Date
-      while @callbacks.length > 0 && now - @callbacks[0].timestamp > 30*1000
-        @callbacks.shift().callback []
-      
-    @clearCallbacksInterval = setInterval clearCallbacks, 3000
-
-  appendMessage: (nick, type, text, options) ->
-    m = { 
-          nick: nick, 
-          type: type, # "msg", "join", "part"
-          text: text,
-          timestamp: (new Date).getTime(),
-          id:   index
-        }
-    if options
-      for key, value of options 
-        m[key] = value
-    
-    index += 1
-    switch type
-      when "msg" then sys.puts("<" + nick + "> " + text)
-      when "join" then sys.puts(nick + " join")
-      when "part" then sys.puts(nick + " part")
-      when "upload" then @files.push text
-    @messages.push( m )
-    while (@callbacks.length > 0)
-      @callbacks.shift().callback([m])
-    while (@messages.length > MESSAGE_BACKLOG)
-      @messages.shift()
-
-  query: (since, callback) ->
-    matching = []
-    for message in @messages
-      if (message.timestamp > since)
-        matching.push(message)
-    if matching.length != 0
-      callback matching
-    else
-      @callbacks.push { timestamp: new Date, callback: callback }
-
-channel = new Channel
+channel = new chan.Channel
 sessions = {}
 
 createSession = (nick) ->
@@ -147,12 +88,15 @@ exports.server = http.createServer (req, res) ->
         <input type="submit" value="Upload" style="float:left">
         </form>
       '''
-      res.end result 
-      if files.upload && files.upload.name.match(/mp3/i)
-        sys.puts("file upload " + files.upload.name)
-        fs.rename files.upload.path, "tmp/#{files.upload.name}", ->
-          res.tag_file files.upload.name, (id3_tags) ->
-            channel.appendMessage(null, "upload", files.upload.name, id3_tags)
+      res.end result
+      for filename, data of files
+        if data.name.match(/mp3/i)
+          sys.puts("file upload " + data.name)
+          do (filename) ->
+            new_filename = data.name
+            fs.rename data.path, "tmp/#{new_filename}", ->
+              res.tag_file new_filename, (id3_tags) ->
+                channel.appendMessage(null, "upload", new_filename, id3_tags)
 
   else if (req.url == '/form')
     # show a file upload form
@@ -189,7 +133,7 @@ exports.server = http.createServer (req, res) ->
       return
     session.poke()
     channel.appendMessage(session.nick, "msg", text)
-    res.simpleJSON(200, { rss: mem.rss })
+    res.simpleJSON(200, {})
 
   else if req.url == '/cleanup_bad_files'
     fs.readdir './tmp', (err, files) ->
@@ -243,14 +187,14 @@ exports.server = http.createServer (req, res) ->
     channel.query since, (messages) ->
       if (session) 
         session.poke()
-      res.simpleJSON(200, { messages: messages, rss: mem.rss })
+      res.simpleJSON(200, { messages: messages })
   
   else if (pathname == "/part")
     id = qs.parse(url.parse(req.url).query).id
     if (id && sessions[id])
       session = sessions[id]
       session.destroy()
-    res.simpleJSON(200, { rss: mem.rss })
+    res.simpleJSON(200, {})
   
   else if (pathname == "/join")
     nick = qs.parse(url.parse(req.url).query).nick
@@ -262,7 +206,7 @@ exports.server = http.createServer (req, res) ->
       res.simpleJSON(400, {error: "Nick in use"})
       return
     channel.appendMessage(session.nick, "join")
-    response_json = { id: session.id, nick: session.nick, rss: mem.rss, starttime: starttime }
+    response_json = { id: session.id, nick: session.nick, starttime: starttime }
     res.simpleJSON(200, response_json)
   
   else if pathname == "/who"
@@ -271,7 +215,7 @@ exports.server = http.createServer (req, res) ->
       if (!session.hasOwnProperty('id')) 
         continue
       nicks.push(session.nick)
-    res.simpleJSON(200, { nicks: nicks, rss: mem.rss})
+    res.simpleJSON(200, { nicks: nicks })
   
   else if match = pathname.match(/\/tmp\/(.*)/)
     filename = match[1]

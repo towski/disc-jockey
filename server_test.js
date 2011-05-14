@@ -111,14 +111,62 @@ exports.testSubmitFile = function(test){
 
 exports.testUploadFile = function(test){
   hello.server.channel.messages = []
-  var request = client.request('POST', '/upload', {"content-type":'multipart/form-data; boundary=----WebKitFormBoundaryJdVtfxj0HfroJvSE', 'connection':'keep-alive'}).on('response', function (response) {
+  fs.unlink("tmp/thefile.mp3")
+  fs.unlink("tags/thefile.mp3")
+  var fileCreated = false;  
+  var tagsCreated = false;
+  var headers = {
+    "Content-Type":"multipart/form-data; boundary=----randomstring1337"
+  }
+  var request = client.request('POST', '/upload', headers).on('response', function (response) {
     test.equal(200, response.statusCode);
-    test.done();
   })
-  request.write(fs.readFileSync("tmp/01 Synthy.mp3"))
+  request.write("------randomstring1337\r\n")
+  request.write('Content-Disposition: form-data; name="upload"; filename="thefile.mp3"\r\n')
+  request.write('Content-Type: application/octet-stream"\r\n')
+  request.write('\r\n')
+  request.write('hey this is the file\r\n')
+  request.write('------randomstring1337--')
   request.end()
+  fs.watchFile("tmp/thefile.mp3", function (curr, prev) {
+    fileCreated = true;
+    if(fileCreated && tagsCreated){
+      test.done()
+    }
+  });
+  fs.watchFile("tags/thefile.mp3", function (curr, prev) {
+    var tagsCreated = true;
+    if(fileCreated && tagsCreated){
+      test.done()
+    }
+  });
 }
 
+exports.testUploadMultipleFiles = function(test){
+  hello.server.channel.messages = []
+  fs.unlink("tmp/thefile.mp3")
+  fs.unlink("tags/thefile.mp3")
+  fs.stat("boogoo")
+  var headers = {
+    "Content-Type":"multipart/form-data; boundary=----randomstring1337",
+    "Connection":"keep-alive"
+  }
+  var request = client.request('POST', '/upload', headers).on('response', function (response) {
+    test.equal(200, response.statusCode);
+  })
+  request.write("------randomstring1337\r\n")
+  request.write('Content-Disposition: form-data; name="upload"; filename="thefile.mp3"\r\n')
+  request.write('Content-Type: application/octet-stream"\r\n')
+  request.write('\r\n')
+  request.write('hey this is the file\r\n')
+  request.write('------randomstring1337')
+  request.write('Content-Disposition: form-data; name="upload"; filename="thefile2.mp3"\r\n')
+  request.write('Content-Type: application/octet-stream"\r\n')
+  request.write('\r\n')
+  request.write('another file\r\n')
+  request.write('------randomstring1337--')
+  request.end()
+}
 
 //process.addListener('exit', function() {
 //  console.log("Success");
