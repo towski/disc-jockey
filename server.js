@@ -5,8 +5,15 @@ PORT = 9817
 var mongodb = require('mongodb');
 var server_code = require('./server_code')
 var fs = require('fs')
+var mongo_config;
 
-mongodb.connect(JSON.parse(fs.readFileSync('config.json')).mongo, function(error, db){
+if(process.env.NODE_ENV == "local"){
+  mongo_config = JSON.parse(fs.readFileSync('config.json.local')).mongo;
+}else{
+  mongo_config = JSON.parse(fs.readFileSync('config.json')).mongo;
+}
+
+mongodb.connect(mongo_config, function(error, db){
   if (error) {
     throw error
   }
