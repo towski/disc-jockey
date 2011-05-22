@@ -9,8 +9,11 @@ exports.MediaQueue = class MediaQueue
     @soundcloud_started = false
     @soundcloud_registered = false
 
-  queueYoutube: (array) ->
-    @songs = @songs.concat({type: 'youtube', vid: array.text, id: array.id})
+  queueYoutube: (video) ->
+    video.type = 'youtube'
+    video.vid = video.text
+    @songs = @songs.concat(video)
+    $('#song_list').append("<li>youtube video <a href='#{video.url}' target='_blank'>#{video.title}</a> <a href='#' onclick='window.media_queue.removeSongs(#{video.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     if @local_playback && !@playback_started
       @playNext()
       

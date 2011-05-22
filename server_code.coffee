@@ -1,6 +1,8 @@
 # when the daemon started
 starttime = (new Date).getTime()
-static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf"]
+static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", 
+  "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf",
+  "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png"]
 
 sys = require("sys")
 url = require("url")
@@ -11,8 +13,9 @@ path = require("path")
 fs = require("fs")
 util = require("util")
 chan = require("./channel")
-mongodb = require('mongodb');
+mongodb = require('mongodb')
 ID3 = require("id3")
+xml2js = require('xml2js')
 
 SESSION_TIMEOUT = 60 * 1000
 
@@ -25,9 +28,9 @@ exports.Server = class Server
     @sessions = {}
     @sessionTimeout = setInterval () =>
       now = new Date
-      for session in @sessions
+      for session_id, session of @sessions
         if (now - session.timestamp > SESSION_TIMEOUT)
-          session.destroy()
+          session.destroy(@channel, @sessions)
     , 1000
     @server = http.createServer (req, res) =>
       pathname = url.parse(req.url).pathname
@@ -50,6 +53,22 @@ exports.Server = class Server
           }
           callback(id3_tags)
       
+      cookies = {}
+      if req.headers.cookie 
+        for cookie in req.headers.cookie.split(';')
+          parts = cookie.split('=')
+          cookies[ parts[ 0 ].trim() ] = ( parts[ 1 ] || '' ).trim()
+      
+      id = qs.parse(url.parse(req.url).query).id
+      if cookies.session_id && @sessions[cookies.session_id]
+        session = @sessions[cookies.session_id]
+        session.poke()
+      else if id && @sessions[id]
+        session = @sessions[id]
+        session.poke()
+      else
+        session = {nick: "guest"}
+      
       if req.url == '/upload' && req.method.toLowerCase() == 'post'
         # parse a file upload
         form = new formidable.IncomingForm()
@@ -57,6 +76,7 @@ exports.Server = class Server
           res.writeHead(200, {'content-type': 'text/html'})
           result = '''
             <h3>Upload a Song (mp3)</h3>
+            <link rel="stylesheet" href="style.css" type="text/css"/>
             <form action="/upload" enctype="multipart/form-data" method="post">
             <input type="file" name="upload" multiple="multiple" style="float:left">
             <input type="submit" value="Upload" style="float:left">
@@ -71,12 +91,13 @@ exports.Server = class Server
                 fs.rename data.path, "tmp/#{new_filename}", =>
                   res.tag_file new_filename, (id3_tags) =>
                     new mongodb.Collection(@db, 'tags').insert(id3_tags, {safe:true})
-                    @channel.appendMessage(null, "upload", new_filename, id3_tags)
+                    @channel.appendMessage(session.nick, "upload", new_filename, id3_tags)
       
       else if (req.url == '/form')
         # show a file upload form
         res.writeHead(200, {'content-type': 'text/html'})
         result = '<h3>Upload a Song (mp3)</h3>
+          <link rel="stylesheet" href="style.css" type="text/css"/>
           <form action="/upload" enctype="multipart/form-data" method="post">
           <input type="file" name="upload" multiple="multiple" style="float:left">
           <input type="submit" value="Upload" style="float:left">
@@ -90,23 +111,36 @@ exports.Server = class Server
             http://www.youtube.com/watch\?v=([^&]*)
           ) ///
           if match
-            @channel.appendMessage(null, "youtube", match[2])
-          res.end "ok"
+            options = {
+              host: 'gdata.youtube.com',
+              port: 80,
+              path: "/feeds/api/videos?q=#{match[2]}&max-results=1&v=2"
+            }
+            http.get options, (youtube_response) =>
+              data = ''
+              youtube_response.on 'data', (chunk) ->
+                data += chunk
+              youtube_response.on 'end', =>
+                parser = new xml2js.Parser()
+                parser.addListener 'end', (result) =>
+                  @channel.appendMessage(session.nick, "youtube", match[2], {title: result.entry.title, url: fields.youtube_link})
+                  res.end "ok"
+                  data = ''
+                parser.parseString(data)
+            .on 'error', (e) ->
+              console.log("Got error: " + e.message)
           
       else if req.url == '/submit_soundcloud_link' && req.method.toLowerCase() == 'post'
         form = new formidable.IncomingForm()
         form.parse req, (err, fields, files) =>
-          @channel.appendMessage(null, "soundcloud", fields.soundcloud_link)
+          @channel.appendMessage(session.nick, "soundcloud", fields.soundcloud_link)
           res.end "ok"
         
       else if (pathname == "/send")
-        id = qs.parse(url.parse(req.url).query).id
         text = qs.parse(url.parse(req.url).query).text
-        session = @sessions[id]
         if (!session || !text)
           res.simpleJSON(400, { error: "No such session id" })
           return
-        session.poke()
         @channel.appendMessage(session.nick, "msg", text)
         res.simpleJSON(200, {})
       
@@ -146,7 +180,7 @@ exports.Server = class Server
           song_file = unescape(fields.song_selection)
           fs.readFile "tags/#{song_file}", null, (err, data) =>
             if err == null
-              @channel.appendMessage null, "upload", song_file, JSON.parse(data)
+              @channel.appendMessage session.nick, "select", song_file, JSON.parse(data)
             res.writeHead(200, {'content-type': 'text/html'})
             res.end "OK"
       
@@ -154,21 +188,15 @@ exports.Server = class Server
         if !qs.parse(url.parse(req.url).query).since
           res.simpleJSON(400, { error: "Must supply since parameter" })
           return
-        id = qs.parse(url.parse(req.url).query).id
-        if id && @sessions[id]
-          session = @sessions[id]
-          session.poke()
         since = parseInt qs.parse(url.parse(req.url).query).since, 10
         @channel.query since, (messages) ->
-          if (session) 
-            session.poke()
           res.simpleJSON(200, { messages: messages })
       
       else if (pathname == "/part")
         id = qs.parse(url.parse(req.url).query).id
         if (id && @sessions[id])
           session = @sessions[id]
-          session.destroy()
+          session.destroy(@channel, @sessions)
         res.simpleJSON(200, {})
       
       else if (pathname == "/join")
@@ -181,8 +209,9 @@ exports.Server = class Server
           res.simpleJSON(400, {error: "Nick in use"})
           return
         @channel.appendMessage(session.nick, "join")
-        response_json = { id: session.id, nick: session.nick, starttime: starttime }
-        res.simpleJSON(200, response_json)
+        body = new Buffer(JSON.stringify({ id: session.id, nick: session.nick, starttime: starttime }))
+        res.writeHead(200, { "Content-Type": "text/json", 'Set-Cookie': "session_id=#{session.id}", "Content-Length": body.length})
+        res.end(body)
       
       else if pathname == "/who"
         nicks = []
@@ -239,8 +268,8 @@ exports.Server = class Server
     if (/[^\w_\-^!]/.exec(nick)) 
       return null
   
-    for session in @sessions
-      if (session && session.nick == nick) 
+    for session_id, user of @sessions
+      if (user && user.nick == nick) 
         return null
   
     session = { 
@@ -251,9 +280,9 @@ exports.Server = class Server
       poke: ->
         session.timestamp = new Date
   
-      destroy: ->
-        @channel.appendMessage(session.nick, "part")
-        delete @sessions[session.id]
+      destroy: (channel, sessions) ->
+        channel.appendMessage(session.nick, "part")
+        delete sessions[session.id]
     }
   
     @sessions[session.id] = session;

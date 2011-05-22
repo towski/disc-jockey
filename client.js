@@ -1,5 +1,5 @@
 (function() {
-  var CONFIG, addMessage, first_poll, longPoll, nicks, onConnect, outputUsers, rss, scrollDown, send, showChat, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
+  var CONFIG, addMessage, first_poll, longPoll, nicks, onConnect, outputUsers, scrollDown, send, showChat, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
   CONFIG = {
     debug: false,
     nick: "#",
@@ -175,15 +175,20 @@
             userPart(message.nick, message.timestamp);
             break;
           case "youtube":
-            $('#song_list').append("<li>youtube video " + message.text + " <a href='#' onclick='window.media_queue.removeSongs(" + message.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
+            addMessage(message.nick, "requested " + message.title, message.timestamp, "join");
             window.media_queue.queueYoutube(message);
             break;
           case "soundcloud":
+            addMessage(message.nick, "requested a soundcloud link", message.timestamp, "join");
             $('#song_list').append("<li>soundcloud url " + message.text + " <a href='#' onclick='window.media_queue.removeSongs(" + message.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
             window.media_queue.queueSoundCloud(message);
             break;
           case "upload":
-            addMessage("room", "uploaded " + message.text, message.timestamp, "join");
+            addMessage(message.nick, "uploaded " + message.title, message.timestamp, "join");
+            song = window.media_queue.queueMP3(message);
+            break;
+          case "select":
+            addMessage(message.nick, "selected " + message.title, message.timestamp, "join");
             song = window.media_queue.queueMP3(message);
         }
       }
@@ -229,7 +234,6 @@
   };
   showLoad = function() {
     $("#connect").hide();
-    $("#loading").show();
     return $("#toolbar").hide();
   };
   showChat = function(nick) {
@@ -237,7 +241,6 @@
     $("#entry").focus();
     $("#entry").show();
     $("#connect").hide();
-    $("#loading").hide();
     return scrollDown();
   };
   updateTitle = function() {
@@ -248,18 +251,15 @@
     }
   };
   starttime = null;
-  rss = null;
   ytswf = null;
   onConnect = function(session) {
     if (session.error) {
-      alert("error connecting: " + session.error);
-      showConnect();
+      $('toolbar').show();
       return;
     }
     CONFIG.nick = session.nick;
     CONFIG.id = session.id;
     starttime = new Date(session.starttime);
-    rss = session.rss;
     showChat(CONFIG.nick);
     $(window).bind("blur", function() {
       CONFIG.focus = false;
@@ -323,9 +323,9 @@
           nick: nick
         },
         error: function(response) {
-          console.log(response);
-          alert("error connecting to server");
-          return showConnect();
+          alert(JSON.parse(response.response).error);
+          $('#toolbar').show();
+          return $('#connect').show();
         },
         success: onConnect
       };
@@ -416,7 +416,6 @@
     };
     swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "100", "100", "8", null, null, params, atts);
     if (CONFIG.debug) {
-      $("#loading").hide();
       $("#connect").hide();
       scrollDown();
       return;

@@ -11,12 +11,11 @@
       this.soundcloud_started = false;
       this.soundcloud_registered = false;
     }
-    MediaQueue.prototype.queueYoutube = function(array) {
-      this.songs = this.songs.concat({
-        type: 'youtube',
-        vid: array.text,
-        id: array.id
-      });
+    MediaQueue.prototype.queueYoutube = function(video) {
+      video.type = 'youtube';
+      video.vid = video.text;
+      this.songs = this.songs.concat(video);
+      $('#song_list').append("<li>youtube video <a href='" + video.url + "' target='_blank'>" + video.title + "</a> <a href='#' onclick='window.media_queue.removeSongs(" + video.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
       if (this.local_playback && !this.playback_started) {
         return this.playNext();
       }

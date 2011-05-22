@@ -1,5 +1,5 @@
 (function() {
-  var ID3, SESSION_TIMEOUT, Server, chan, formidable, fs, http, mongodb, path, qs, starttime, static_files, sys, url, util;
+  var ID3, SESSION_TIMEOUT, Server, chan, formidable, fs, http, mongodb, path, qs, starttime, static_files, sys, url, util, xml2js;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
     for (var i = 0, l = this.length; i < l; i++) {
       if (this[i] === item) return i;
@@ -7,7 +7,7 @@
     return -1;
   };
   starttime = (new Date).getTime();
-  static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf"];
+  static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf", "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png"];
   sys = require("sys");
   url = require("url");
   qs = require("querystring");
@@ -19,6 +19,7 @@
   chan = require("./channel");
   mongodb = require('mongodb');
   ID3 = require("id3");
+  xml2js = require('xml2js');
   SESSION_TIMEOUT = 60 * 1000;
   exports.Server = Server = (function() {
     function Server(db) {
@@ -26,18 +27,18 @@
       this.channel = new chan.Channel(this.db);
       this.sessions = {};
       this.sessionTimeout = setInterval(__bind(function() {
-        var now, session, _i, _len, _ref, _results;
+        var now, session, session_id, _ref, _results;
         now = new Date;
         _ref = this.sessions;
         _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          session = _ref[_i];
-          _results.push(now - session.timestamp > SESSION_TIMEOUT ? session.destroy() : void 0);
+        for (session_id in _ref) {
+          session = _ref[session_id];
+          _results.push(now - session.timestamp > SESSION_TIMEOUT ? session.destroy(this.channel, this.sessions) : void 0);
         }
         return _results;
       }, this), 1000);
       this.server = http.createServer(__bind(function(req, res) {
-        var filename, form, id, match, nick, nicks, pathname, response_json, result, session, session_id, since, text, uri, _ref, _ref2;
+        var body, cookie, cookies, filename, form, id, match, nick, nicks, parts, pathname, result, session, session_id, since, text, uri, _i, _len, _ref, _ref2, _ref3;
         pathname = url.parse(req.url).pathname;
         res.simpleJSON = function(code, obj) {
           var body;
@@ -64,6 +65,27 @@
             return callback(id3_tags);
           });
         };
+        cookies = {};
+        if (req.headers.cookie) {
+          _ref = req.headers.cookie.split(';');
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            cookie = _ref[_i];
+            parts = cookie.split('=');
+            cookies[parts[0].trim()] = (parts[1] || '').trim();
+          }
+        }
+        id = qs.parse(url.parse(req.url).query).id;
+        if (cookies.session_id && this.sessions[cookies.session_id]) {
+          session = this.sessions[cookies.session_id];
+          session.poke();
+        } else if (id && this.sessions[id]) {
+          session = this.sessions[id];
+          session.poke();
+        } else {
+          session = {
+            nick: "guest"
+          };
+        }
         if (req.url === '/upload' && req.method.toLowerCase() === 'post') {
           form = new formidable.IncomingForm();
           return form.parse(req, __bind(function(err, fields, files) {
@@ -71,7 +93,7 @@
             res.writeHead(200, {
               'content-type': 'text/html'
             });
-            result = '<h3>Upload a Song (mp3)</h3>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
+            result = '<h3>Upload a Song (mp3)</h3>\n<link rel="stylesheet" href="style.css" type="text/css"/>\n<form action="/upload" enctype="multipart/form-data" method="post">\n<input type="file" name="upload" multiple="multiple" style="float:left">\n<input type="submit" value="Upload" style="float:left">\n</form>';
             res.end(result);
             _results = [];
             for (filename in files) {
@@ -84,7 +106,7 @@
                     new mongodb.Collection(this.db, 'tags').insert(id3_tags, {
                       safe: true
                     });
-                    return this.channel.appendMessage(null, "upload", new_filename, id3_tags);
+                    return this.channel.appendMessage(session.nick, "upload", new_filename, id3_tags);
                   }, this));
                 }, this));
               }, this)(filename)) : void 0);
@@ -96,6 +118,7 @@
             'content-type': 'text/html'
           });
           result = '<h3>Upload a Song (mp3)</h3>\
+          <link rel="stylesheet" href="style.css" type="text/css"/>\
           <form action="/upload" enctype="multipart/form-data" method="post">\
           <input type="file" name="upload" multiple="multiple" style="float:left">\
           <input type="submit" value="Upload" style="float:left">\
@@ -104,37 +127,59 @@
         } else if (req.url === '/submit_youtube_link' && req.method.toLowerCase() === 'post') {
           form = new formidable.IncomingForm();
           return form.parse(req, __bind(function(err, fields, files) {
-            var match;
+            var match, options;
             match = fields.youtube_link.match(/^(http:\/\/www.youtube.com\/watch\?v=([^&]*))/);
             if (match) {
-              this.channel.appendMessage(null, "youtube", match[2]);
+              options = {
+                host: 'gdata.youtube.com',
+                port: 80,
+                path: "/feeds/api/videos?q=" + match[2] + "&max-results=1&v=2"
+              };
+              return http.get(options, __bind(function(youtube_response) {
+                var data;
+                data = '';
+                youtube_response.on('data', function(chunk) {
+                  return data += chunk;
+                });
+                return youtube_response.on('end', __bind(function() {
+                  var parser;
+                  parser = new xml2js.Parser();
+                  parser.addListener('end', __bind(function(result) {
+                    this.channel.appendMessage(session.nick, "youtube", match[2], {
+                      title: result.entry.title,
+                      url: fields.youtube_link
+                    });
+                    res.end("ok");
+                    return data = '';
+                  }, this));
+                  return parser.parseString(data);
+                }, this));
+              }, this)).on('error', function(e) {
+                return console.log("Got error: " + e.message);
+              });
             }
-            return res.end("ok");
           }, this));
         } else if (req.url === '/submit_soundcloud_link' && req.method.toLowerCase() === 'post') {
           form = new formidable.IncomingForm();
           return form.parse(req, __bind(function(err, fields, files) {
-            this.channel.appendMessage(null, "soundcloud", fields.soundcloud_link);
+            this.channel.appendMessage(session.nick, "soundcloud", fields.soundcloud_link);
             return res.end("ok");
           }, this));
         } else if (pathname === "/send") {
-          id = qs.parse(url.parse(req.url).query).id;
           text = qs.parse(url.parse(req.url).query).text;
-          session = this.sessions[id];
           if (!session || !text) {
             res.simpleJSON(400, {
               error: "No such session id"
             });
             return;
           }
-          session.poke();
           this.channel.appendMessage(session.nick, "msg", text);
           return res.simpleJSON(200, {});
         } else if (req.url === '/cleanup_bad_files') {
           return fs.readdir('./tmp', function(err, files) {
-            var file, _i, _len;
-            for (_i = 0, _len = files.length; _i < _len; _i++) {
-              file = files[_i];
+            var file, _j, _len2;
+            for (_j = 0, _len2 = files.length; _j < _len2; _j++) {
+              file = files[_j];
               if (!file.match(/^.gitignore$|\.mp3$/)) {
                 fs.unlink('./tmp/' + file);
               }
@@ -146,10 +191,10 @@
           });
         } else if (req.url === '/tag_all_files') {
           return fs.readdir('./tmp', function(err, files) {
-            var file, _i, _len;
+            var file, _j, _len2;
             files.splice(files.indexOf(".gitignore"), 1);
-            for (_i = 0, _len = files.length; _i < _len; _i++) {
-              file = files[_i];
+            for (_j = 0, _len2 = files.length; _j < _len2; _j++) {
+              file = files[_j];
               res.tag_file(file, function() {});
             }
             res.writeHead(200, {
@@ -159,11 +204,11 @@
           });
         } else if (req.url.match(/^\/files/)) {
           return fs.readdir('./tags', function(err, files) {
-            var data, file, file_data, _i, _len;
+            var data, file, file_data, _j, _len2;
             files.splice(files.indexOf(".gitignore"), 1);
             file_data = [];
-            for (_i = 0, _len = files.length; _i < _len; _i++) {
-              file = files[_i];
+            for (_j = 0, _len2 = files.length; _j < _len2; _j++) {
+              file = files[_j];
               data = fs.readFileSync("tags/" + file);
               try {
                 data = JSON.parse(data);
@@ -187,7 +232,7 @@
             song_file = unescape(fields.song_selection);
             return fs.readFile("tags/" + song_file, null, __bind(function(err, data) {
               if (err === null) {
-                this.channel.appendMessage(null, "upload", song_file, JSON.parse(data));
+                this.channel.appendMessage(session.nick, "select", song_file, JSON.parse(data));
               }
               res.writeHead(200, {
                 'content-type': 'text/html'
@@ -202,16 +247,8 @@
             });
             return;
           }
-          id = qs.parse(url.parse(req.url).query).id;
-          if (id && this.sessions[id]) {
-            session = this.sessions[id];
-            session.poke();
-          }
           since = parseInt(qs.parse(url.parse(req.url).query).since, 10);
           return this.channel.query(since, function(messages) {
-            if (session) {
-              session.poke();
-            }
             return res.simpleJSON(200, {
               messages: messages
             });
@@ -220,7 +257,7 @@
           id = qs.parse(url.parse(req.url).query).id;
           if (id && this.sessions[id]) {
             session = this.sessions[id];
-            session.destroy();
+            session.destroy(this.channel, this.sessions);
           }
           return res.simpleJSON(200, {});
         } else if (pathname === "/join") {
@@ -239,17 +276,22 @@
             return;
           }
           this.channel.appendMessage(session.nick, "join");
-          response_json = {
+          body = new Buffer(JSON.stringify({
             id: session.id,
             nick: session.nick,
             starttime: starttime
-          };
-          return res.simpleJSON(200, response_json);
+          }));
+          res.writeHead(200, {
+            "Content-Type": "text/json",
+            'Set-Cookie': "session_id=" + session.id,
+            "Content-Length": body.length
+          });
+          return res.end(body);
         } else if (pathname === "/who") {
           nicks = [];
-          _ref = this.sessions;
-          for (session_id in _ref) {
-            session = _ref[session_id];
+          _ref2 = this.sessions;
+          for (session_id in _ref2) {
+            session = _ref2[session_id];
             if (!session.hasOwnProperty('id')) {
               continue;
             }
@@ -274,7 +316,7 @@
             res.write(file, "binary");
             return res.end();
           });
-        } else if ((_ref2 = req.url, __indexOf.call(static_files, _ref2) >= 0)) {
+        } else if ((_ref3 = req.url, __indexOf.call(static_files, _ref3) >= 0)) {
           uri = url.parse(req.url).pathname;
           filename = path.join(process.cwd(), uri);
           if (req.url === "/") {
@@ -311,7 +353,7 @@
       return this.server.listen(host, port);
     };
     Server.prototype.createSession = function(nick) {
-      var session, _i, _len, _ref;
+      var session, session_id, user, _ref;
       if (nick.length > 50) {
         return null;
       }
@@ -319,9 +361,9 @@
         return null;
       }
       _ref = this.sessions;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        session = _ref[_i];
-        if (session && session.nick === nick) {
+      for (session_id in _ref) {
+        user = _ref[session_id];
+        if (user && user.nick === nick) {
           return null;
         }
       }
@@ -332,9 +374,9 @@
         poke: function() {
           return session.timestamp = new Date;
         },
-        destroy: function() {
-          this.channel.appendMessage(session.nick, "part");
-          return delete this.sessions[session.id];
+        destroy: function(channel, sessions) {
+          channel.appendMessage(session.nick, "part");
+          return delete sessions[session.id];
         }
       };
       this.sessions[session.id] = session;

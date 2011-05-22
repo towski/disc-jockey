@@ -218,13 +218,17 @@ longPoll = (data) ->
         when "join" then userJoin(message.nick, message.timestamp)
         when "part" then userPart(message.nick, message.timestamp)
         when "youtube"
-          $('#song_list').append("<li>youtube video #{message.text} <a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
+          addMessage(message.nick, "requested " + message.title, message.timestamp, "join")
           window.media_queue.queueYoutube(message)
         when "soundcloud"
+          addMessage(message.nick, "requested a soundcloud link", message.timestamp, "join")
           $('#song_list').append("<li>soundcloud url #{message.text} <a href='#' onclick='window.media_queue.removeSongs(#{message.id}); $(this.parentElement).remove(); return false'>x</a></li>")
           window.media_queue.queueSoundCloud(message)
         when "upload"
-          addMessage("room", "uploaded " + message.text, message.timestamp, "join")
+          addMessage(message.nick, "uploaded " + message.title, message.timestamp, "join")
+          song = window.media_queue.queueMP3(message)
+        when "select"
+          addMessage(message.nick, "selected " + message.title, message.timestamp, "join")
           song = window.media_queue.queueMP3(message)
     #update the document title to include unread message count if blurred
     updateTitle()
@@ -273,7 +277,6 @@ showConnect = () ->
 #transition the page to the loading screen
 showLoad = () ->
   $("#connect").hide()
-  $("#loading").show()
   $("#toolbar").hide()
 
 #transition the page to the main chat view, putting the cursor in the textfield
@@ -282,7 +285,6 @@ showChat = (nick) ->
   $("#entry").focus()
   $("#entry").show()
   $("#connect").hide()
-  $("#loading").hide()
   scrollDown()
 
 #we want to show a count of unread messages when the window does not have focus
@@ -294,21 +296,17 @@ updateTitle = () ->
     
 # daemon start time
 starttime = null
-# daemon memory usage
-rss = null
 ytswf = null
 
 #handle the servers response to our nickname and join request
 onConnect = (session) ->
   if (session.error)
-    alert("error connecting: " + session.error)
-    showConnect()
+    $('toolbar').show()
     return
 
   CONFIG.nick = session.nick
   CONFIG.id   = session.id
   starttime   = new Date(session.starttime)
-  rss         = session.rss
 
   #update the UI to show the chat
   showChat(CONFIG.nick)
@@ -372,9 +370,9 @@ $(document).ready () ->
     ajax_params = { 
       cache: false, type: "GET", dataType: "json", url: "/join", data: { nick: nick }, 
       error: (response) ->
-        console.log(response)
-        alert("error connecting to server")
-        showConnect()
+        alert(JSON.parse(response.response).error)
+        $('#toolbar').show()
+        $('#connect').show()
       , success: onConnect
     }
     $.ajax ajax_params
@@ -433,7 +431,6 @@ $(document).ready () ->
   swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "100", "100", "8", null, null, params, atts)
 
   if (CONFIG.debug)
-    $("#loading").hide()
     $("#connect").hide()
     scrollDown()
     return

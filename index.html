@@ -8,19 +8,15 @@
     <script type="text/javascript" src="swfobject.js"></script>
     <script type="text/javascript" src="soundcloud.player.api.js"></script>
     <script type="text/javascript">
-         soundcloud.addEventListener('onPlayerReady', function(player, data) {
-           console.log("ready");
-           soundcloud_player = soundcloud.getPlayer('myPlayer');
-           media_queue.sound_cloud_registered = true;
-           media_queue.loadCurrentSoundCloud();
-         });
-    </script>
-    <!-- configure it for your use -->
-    <script type="text/javascript">
-      soundManager.url = '/swf/'; // directory where SM2 .SWFs live
-      // do this to skip flash block handling for now. See the flashblock demo when you want to start getting fancy.
+      soundcloud.addEventListener('onPlayerReady', function(player, data) {
+        console.log("ready");
+        soundcloud_player = soundcloud.getPlayer('myPlayer');
+        media_queue.sound_cloud_registered = true;
+        media_queue.loadCurrentSoundCloud();
+      });
+    
+      soundManager.url = '/swf/'; 
       soundManager.useFlashBlock = false;
-      // disable debug mode after development/testing..
       soundManager.debugMode = false;
       
       var ytswf;
@@ -48,12 +44,10 @@
         media_queue.skipCurrentSong();
       });
       
-      //playSoundCloud("http://api.soundcloud.com/tracks/7304162?secret_token=s-B6qh7")
       function startSoundCloud(url){
         var flashvars = {
           enable_api: true, 
           object_id: "myPlayer"
-          //url: url //"http://soundcloud.com/forss/flickermood" 
         };
         var params = {
           allowscriptaccess: "always"
@@ -67,8 +61,10 @@
     </script>
     <title>jockey - dj the world</title>
   </head>
-  <body>
+  <body style='background: #f8f8f8'>
     <div id="app">
+      <div class="roundedcornr_top"><div></div></div>
+      <div id="content" style='margin: 0 15px'>
       <div id="activity">
         <h2> Activity </h2>
         <div id="log">
@@ -76,7 +72,6 @@
         <div id="toolbar">
           <ul id="status">
             <li><a id="usersLink" href="#">? users</a></li>
-            <li>uptime: <span id="uptime">?</span></li>
           </ul>
           <input tabindex="1" type="text" id="entry" style='display:none'/>
           
@@ -88,9 +83,7 @@
               </fieldset>
             </form>
           </div>
-          
         </div>
-
         <div id="loading" style="position:fixed; display:none"><p>loading</p></div>
       </div>
       <div id="left">
@@ -147,6 +140,8 @@
       </div>
         <div style="clear:both"></div>
       </div>
+    </div>
+      <div class="roundedcornr_bottom"><div></div></div>
     </div>
   </body>
 </html>
