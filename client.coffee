@@ -428,7 +428,7 @@ $(document).ready () ->
   
   params = { allowScriptAccess: "always" }
   atts = { id: "myytplayer" }
-  swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "100", "100", "8", null, null, params, atts)
+  swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3", "ytapiplayer", "425", "356", "8", null, null, params, atts)
 
   if (CONFIG.debug)
     $("#connect").hide()

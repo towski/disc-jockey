@@ -20,6 +20,7 @@
       soundManager.debugMode = false;
       
       var ytswf;
+      var youtube_timeout;
   
       function onYouTubePlayerReady(playerId) {
         ytswf = document.getElementById("myytplayer");
@@ -28,9 +29,13 @@
       }
       
       function onytplayerStateChange(newState) {
-        console.log(newState)
+        clearTimeout(youtube_timeout);
         if(newState == 0){
           media_queue.skipCurrentSong();
+        } else if(newState == -1) {
+          youtube_timeout = setTimeout(function(){
+            media_queue.skipCurrentSong();
+          }, 5000)
         }
       }
       
