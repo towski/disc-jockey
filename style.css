@@ -82,13 +82,13 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #entry {
-  width: 100%;
+  width: 95%;
   font-size: inherit;
   margin: 0;
-  border-width: 0;
+  border: 1px solid #eee;
   outline-width: 0;
   height:40px;
-  line-height: 3em;
+  line-height: 1em;
 }
 
 #song_list {
@@ -136,6 +136,11 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #left > div {
   border-bottom:3px solid #fff;
+}
+
+.form {
+  padding: 10px;
+  display:none;
 }
 
 #left div:last-child {

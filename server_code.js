@@ -260,6 +260,17 @@
             session.destroy(this.channel, this.sessions);
           }
           return res.simpleJSON(200, {});
+        } else if (pathname === "/check_session") {
+          id = cookies.session_id;
+          if (id && this.sessions[id]) {
+            return res.simpleJSON(200, {
+              success: true
+            });
+          } else {
+            return res.simpleJSON(200, {
+              success: false
+            });
+          }
         } else if (pathname === "/join") {
           nick = qs.parse(url.parse(req.url).query).nick;
           if (nick === null || nick.length === 0) {

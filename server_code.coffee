@@ -198,6 +198,13 @@ exports.Server = class Server
           session = @sessions[id]
           session.destroy(@channel, @sessions)
         res.simpleJSON(200, {})
+        
+      else if (pathname == "/check_session")
+        id = cookies.session_id
+        if (id && @sessions[id])
+          res.simpleJSON(200, {success: true})
+        else
+          res.simpleJSON(200, {success: false})
       
       else if (pathname == "/join")
         nick = qs.parse(url.parse(req.url).query).nick

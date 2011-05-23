@@ -7,6 +7,10 @@ CONFIG = { debug: false
              }
 
 nicks = []
+exports = if exports
+  exports
+else
+  this
 
 Array.prototype.remove = (from, to) ->
   rest = this.slice((to || from) + 1 || this.length);
@@ -125,7 +129,7 @@ util = {
 }
 
 #used to keep the most recent messages visible
-scrollDown = () ->
+exports.scrollDown = () ->
   $('#log').scrollTop(1000000)
   #window.scrollBy(0, 100000000000000000)
   $("#entry").focus()
@@ -280,7 +284,7 @@ showLoad = () ->
   $("#toolbar").hide()
 
 #transition the page to the main chat view, putting the cursor in the textfield
-showChat = (nick) ->
+exports.showChat = (nick) ->
   $("#toolbar").show()
   $("#entry").focus()
   $("#entry").show()
@@ -444,6 +448,14 @@ $(document).ready () ->
   longPoll()
 
   showConnect()
+  if(Cookie.get("session_id"))
+    $.ajax({
+      type: "get", dataType: "json", url: "/check_session",
+      success: (response) ->
+        if(response.success)
+          showChat()
+    })
+  $('#youtube_toggle').click()
 
 #if we can, notify the server that were going away.
 $(window).unload () ->

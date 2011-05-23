@@ -1,5 +1,5 @@
 (function() {
-  var CONFIG, addMessage, first_poll, longPoll, nicks, onConnect, outputUsers, scrollDown, send, showChat, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
+  var CONFIG, addMessage, exports, first_poll, longPoll, nicks, onConnect, outputUsers, send, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
   CONFIG = {
     debug: false,
     nick: "#",
@@ -9,6 +9,7 @@
     unread: 0
   };
   nicks = [];
+  exports = exports ? exports : this;
   Array.prototype.remove = function(from, to) {
     var rest;
     rest = this.slice((to || from) + 1 || this.length);
@@ -110,7 +111,7 @@
       return text.match(blank) !== null;
     }
   };
-  scrollDown = function() {
+  exports.scrollDown = function() {
     $('#log').scrollTop(1000000);
     return $("#entry").focus();
   };
@@ -236,7 +237,7 @@
     $("#connect").hide();
     return $("#toolbar").hide();
   };
-  showChat = function(nick) {
+  exports.showChat = function(nick) {
     $("#toolbar").show();
     $("#entry").focus();
     $("#entry").show();
@@ -422,7 +423,20 @@
     }
     $("#log table").remove();
     longPoll();
-    return showConnect();
+    showConnect();
+    if (Cookie.get("session_id")) {
+      $.ajax({
+        type: "get",
+        dataType: "json",
+        url: "/check_session",
+        success: function(response) {
+          if (response.success) {
+            return showChat();
+          }
+        }
+      });
+    }
+    return $('#youtube_toggle').click();
   });
   $(window).unload(function() {
     return jQuery.get("/part", {
