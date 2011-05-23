@@ -13,7 +13,6 @@
     <script src='osx.js' type="text/javascript"></script>
     <script type="text/javascript">
       soundcloud.addEventListener('onPlayerReady', function(player, data) {
-        console.log("ready");
         soundcloud_player = soundcloud.getPlayer('myPlayer');
         media_queue.sound_cloud_registered = true;
         media_queue.loadCurrentSoundCloud();
@@ -25,11 +24,13 @@
       
       var ytswf;
       var youtube_timeout;
+      var youtubePlaying = false;
   
       function onYouTubePlayerReady(playerId) {
         ytswf = document.getElementById("myytplayer");
         ytswf.addEventListener("onStateChange", "onytplayerStateChange");
         media_queue.playCurrentVideo();
+        youtubePlaying = true;
       }
       
       function onytplayerStateChange(newState) {
@@ -171,7 +172,7 @@
       <div class="roundedcornr_bottom"><div></div></div>
     </div>
     <div id="osx-modal-content">
-			<div id="osx-modal-title"><center>Youtube Results</center></div>
+			<div id="osx-modal-title"><center>Results</center></div>
 			<div class="close"><a href="#" class="simplemodal-close">x</a></div>
 			<div id="osx-modal-data">
 			  <ul id="osx-modal-data-list">

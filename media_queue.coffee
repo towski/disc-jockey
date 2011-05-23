@@ -117,6 +117,7 @@ exports.MediaQueue = class MediaQueue
       @playNext()
 
   skipCurrentSong: ->
+    window.youtubePlaying = false
     @clearCurrentSong()
     setTimeout(=> 
       @playNext()

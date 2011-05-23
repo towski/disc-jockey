@@ -138,6 +138,7 @@
       }
     };
     MediaQueue.prototype.skipCurrentSong = function() {
+      window.youtubePlaying = false;
       this.clearCurrentSong();
       return setTimeout(__bind(function() {
         return this.playNext();

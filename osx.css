@@ -19,7 +19,6 @@
 /* Container */
 #osx-container {
   z-index: 1000;
-  margin-top: 100px;
   background-color:#fff; 
   color:#000;
   font: 16px/24px "Lucida Grande",Arial,sans-serif;
