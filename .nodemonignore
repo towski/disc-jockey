@@ -4,3 +4,5 @@ client.coffee
 client.js
 index.html
 style.css
+osx.js
+osx.css
