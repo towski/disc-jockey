@@ -62,6 +62,7 @@ a:hover { text-decoration: underline; color: #aaa; }
   bottom:0;
   left:60%;
   overflow:hidden;
+  z-index: 1;
 }
 
 #log {
@@ -71,6 +72,7 @@ a:hover { text-decoration: underline; color: #aaa; }
   overflow:hidden;
   left:0;
   right:0;
+  z-index: 1;
 }
 
 #toolbar {

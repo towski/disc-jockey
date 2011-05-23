@@ -7,7 +7,7 @@
     return -1;
   };
   starttime = (new Date).getTime();
-  static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf", "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png"];
+  static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf", "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png", "/osx.css", "/osx.js", "/jquery.simplemodal.js"];
   sys = require("sys");
   url = require("url");
   qs = require("querystring");
@@ -156,6 +156,10 @@
                 }, this));
               }, this)).on('error', function(e) {
                 return console.log("Got error: " + e.message);
+              });
+            } else {
+              return res.simpleJSON(200, {
+                error: "url not correct"
               });
             }
           }, this));
