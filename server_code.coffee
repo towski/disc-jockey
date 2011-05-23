@@ -75,7 +75,7 @@ exports.Server = class Server
         form.parse req, (err, fields, files) =>
           res.writeHead(200, {'content-type': 'text/html'})
           result = '''
-            <h3>Upload a Song (mp3)</h3>
+            <h3>Upload Songs (mp3)</h3>
             <link rel="stylesheet" href="style.css" type="text/css"/>
             <form action="/upload" enctype="multipart/form-data" method="post">
             <input type="file" name="upload" multiple="multiple" style="float:left">
@@ -96,7 +96,7 @@ exports.Server = class Server
       else if (req.url == '/form')
         # show a file upload form
         res.writeHead(200, {'content-type': 'text/html'})
-        result = '<h3>Upload a Song (mp3)</h3>
+        result = '<h3>Upload Songs (mp3)</h3>
           <link rel="stylesheet" href="style.css" type="text/css"/>
           <form action="/upload" enctype="multipart/form-data" method="post">
           <input type="file" name="upload" multiple="multiple" style="float:left">

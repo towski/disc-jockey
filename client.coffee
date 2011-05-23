@@ -456,6 +456,7 @@ $(document).ready () ->
           showChat()
     })
   $('#youtube_toggle').click()
+  $('#search_youtube_toggle').click()
 
 #if we can, notify the server that were going away.
 $(window).unload () ->

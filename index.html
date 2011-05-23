@@ -121,12 +121,15 @@
           <ul id='song_list'>
           </ul>
         </div>
+        <div id="search-youtube" class='form'>
+          <h3>&nbsp;Search youtube</h3>
+          <form action='http://www.youtube.com/results' target="_blank">
+            <input type="text" id='youtube_search' name="search_query" style="float:left; width:300px;">
+            <input type="submit" value="submit" style="float:left"> &nbsp;
+          </form>
+        </div>
         <div id="add-from-youtube" class='form'>
-          <div>
-            <a href='http://www.youtube.com/results' style='float:right;margin-right:100px;' onclick='this.href = "http://www.youtube.com/results"; this.href = this.href +"?search_query="+ $("#youtube_search")[0].value' target="_blank">youtube search</a>
-            <input type="text" id='youtube_search' name="search" style="float:right; width:100px;">
-            <h3>&nbsp;Submit a youtube link</h3>
-          </div>
+          <h3>&nbsp;Submit a youtube link</h3>
           <form action="/submit_youtube_link" id='youtube_form' method="post" onsubmit='return false;'>
             <input type="text" name="youtube_link" style="float:left; width:300px;">
             <input type="submit" value="submit" style="float:left"> &nbsp;
@@ -153,6 +156,7 @@
           <iframe src="/form" width="550" height="100" scrolling="no" frameborder="0" style="overflow: hidden"> </iframe>
         </div>
         <div style='margin-bottom:15px'>
+          <input type="checkbox" id="search_youtube_toggle" onclick="toggle(this, $('#search-youtube'))" /> search
           <input type="checkbox" id="youtube_toggle" onclick="toggle(this, $('#add-from-youtube'))" /> youtube
           <input type="checkbox" id="soundcloud_toggle" onclick="toggle(this, $('#add-from-sound-cloud'))" /> soundcloud
           <input type="checkbox" id="library_toggle" onclick="toggle(this, $('#select-from-library'))" /> library

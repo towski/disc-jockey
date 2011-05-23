@@ -436,7 +436,8 @@
         }
       });
     }
-    return $('#youtube_toggle').click();
+    $('#youtube_toggle').click();
+    return $('#search_youtube_toggle').click();
   });
   $(window).unload(function() {
     return jQuery.get("/part", {
