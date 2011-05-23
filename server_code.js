@@ -145,8 +145,14 @@
                   var parser;
                   parser = new xml2js.Parser();
                   parser.addListener('end', __bind(function(result) {
+                    var title;
+                    if (result.entry) {
+                      title = result.entry.title;
+                    } else {
+                      title = match[2];
+                    }
                     this.channel.appendMessage(session.nick, "youtube", match[2], {
-                      title: result.entry.title,
+                      title: title,
                       url: fields.youtube_link
                     });
                     res.end("ok");

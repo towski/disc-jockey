@@ -124,7 +124,11 @@ exports.Server = class Server
               youtube_response.on 'end', =>
                 parser = new xml2js.Parser()
                 parser.addListener 'end', (result) =>
-                  @channel.appendMessage(session.nick, "youtube", match[2], {title: result.entry.title, url: fields.youtube_link})
+                  if result.entry
+                    title = result.entry.title
+                  else
+                    title = match[2]
+                  @channel.appendMessage(session.nick, "youtube", match[2], {title: title, url: fields.youtube_link})
                   res.end "ok"
                   data = ''
                 parser.parseString(data)
