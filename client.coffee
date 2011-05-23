@@ -172,8 +172,7 @@ addMessage = (from, text, time, _class) ->
 
   content = """
     <tr>
-       <td class="date">#{ util.timeString(time) }</td>
-       <td class="nick">#{ util.toStaticHTML(from) }</td>
+       <td class="nick" title="#{ util.timeString(time) }">#{ util.toStaticHTML(from) }</td>
        <td class="msg-text">#{ text }</td>
     </tr>
   """

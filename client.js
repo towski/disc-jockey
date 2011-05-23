@@ -136,7 +136,7 @@
       messageElement.addClass("personal");
     }
     text = text.replace(util.urlRE, '<a target="_blank" href="$&">$&</a>');
-    content = "<tr>\n   <td class=\"date\">" + (util.timeString(time)) + "</td>\n   <td class=\"nick\">" + (util.toStaticHTML(from)) + "</td>\n   <td class=\"msg-text\">" + text + "</td>\n</tr>";
+    content = "<tr>\n   <td class=\"nick\" title=\"" + (util.timeString(time)) + "\">" + (util.toStaticHTML(from)) + "</td>\n   <td class=\"msg-text\">" + text + "</td>\n</tr>";
     messageElement.html(content);
     $("#log").append(messageElement);
     return scrollDown();
