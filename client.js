@@ -246,9 +246,9 @@
   };
   updateTitle = function() {
     if (CONFIG.unread) {
-      return document.title = "(" + CONFIG.unread.toString() + ") node chat";
+      return document.title = "(" + CONFIG.unread.toString() + ") dj the world";
     } else {
-      return document.title = "node chat";
+      return document.title = "dj the world";
     }
   };
   starttime = null;
