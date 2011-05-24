@@ -69,7 +69,8 @@ a:hover { text-decoration: underline; color: #aaa; }
   position:absolute;
   top:55px;
   bottom:55px;
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
   left:0;
   right:0;
   z-index: 1;
@@ -95,7 +96,8 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #song_list {
   height:20%;
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
 }
 
 /* not very important info */
