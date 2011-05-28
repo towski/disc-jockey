@@ -62,9 +62,15 @@
               album: id3_3v2.get('album'),
               artist: id3_3v2.get('artist')
             };
-            return callback(id3_tags);
+            callback(id3_tags);
+            return fs.open("tags/" + filename, "w+", 0666, function(err, fd) {
+              var buffer;
+              buffer = new Buffer(JSON.stringify(id3_tags));
+              return fs.write(fd, buffer, 0, buffer.length);
+            });
           });
         };
+        params = qs.parse(url.parse(req.url).query);
         cookies = {};
         if (req.headers.cookie) {
           _ref = req.headers.cookie.split(';');

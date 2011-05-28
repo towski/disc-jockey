@@ -53,7 +53,11 @@ exports.Server = class Server
             artist: id3_3v2.get('artist')
           }
           callback(id3_tags)
+          fs.open "tags/#{filename}", "w+", 0666, (err, fd) ->
+            buffer = new Buffer(JSON.stringify(id3_tags))
+            fs.write fd, buffer, 0, buffer.length
       
+      params = qs.parse(url.parse(req.url).query)
       cookies = {}
       if req.headers.cookie 
         for cookie in req.headers.cookie.split(';')
