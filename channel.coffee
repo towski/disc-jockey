@@ -25,12 +25,11 @@ exports.Channel = class Channel
           id:   @index
         }
         
-    @db.collection 'messages', (error, collection) -> 
-      collection.insert(m)
     if options
       for key, value of options 
         m[key] = value
-    
+    @db.collection 'messages', (error, collection) -> 
+      collection.insert(m)  
     @index += 1
     switch type
       when "msg" then sys.puts("<" + nick + "> " + text)

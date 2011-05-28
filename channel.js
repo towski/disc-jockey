@@ -31,15 +31,15 @@
         timestamp: (new Date).getTime(),
         id: this.index
       };
-      this.db.collection('messages', function(error, collection) {
-        return collection.insert(m);
-      });
       if (options) {
         for (key in options) {
           value = options[key];
           m[key] = value;
         }
       }
+      this.db.collection('messages', function(error, collection) {
+        return collection.insert(m);
+      });
       this.index += 1;
       switch (type) {
         case "msg":
