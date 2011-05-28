@@ -264,11 +264,19 @@
             return;
           }
           since = parseInt(qs.parse(url.parse(req.url).query).since, 10);
-          return this.channel.query(since, function(messages) {
+          return this.channel.query(since, __bind(function(messages) {
+            var current_ids, session, session_id, _ref2;
+            current_ids = {};
+            _ref2 = this.sessions;
+            for (session_id in _ref2) {
+              session = _ref2[session_id];
+              current_ids[session.nick] = session.current_id;
+            }
             return res.simpleJSON(200, {
-              messages: messages
+              messages: messages,
+              current_ids: current_ids
             });
-          });
+          }, this));
         } else if (pathname === "/part") {
           id = qs.parse(url.parse(req.url).query).id;
           if (id && this.sessions[id]) {
@@ -398,7 +406,9 @@
         nick: nick,
         id: Math.floor(Math.random() * 99999999999).toString(),
         timestamp: new Date,
-        poke: function() {
+        current_id: null,
+        poke: function(current_id) {
+          this.current_id = current_id;
           return session.timestamp = new Date;
         },
         destroy: function(channel, sessions) {

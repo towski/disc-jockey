@@ -200,8 +200,11 @@ exports.Server = class Server
           res.simpleJSON(400, { error: "Must supply since parameter" })
           return
         since = parseInt qs.parse(url.parse(req.url).query).since, 10
-        @channel.query since, (messages) ->
-          res.simpleJSON(200, { messages: messages })
+        @channel.query since, (messages) =>
+          current_ids = {}
+          for session_id, session of @sessions
+            current_ids[session.nick] = session.current_id
+          res.simpleJSON(200, { messages: messages, current_ids: current_ids })
       
       else if (pathname == "/part")
         id = qs.parse(url.parse(req.url).query).id
@@ -294,8 +297,10 @@ exports.Server = class Server
       nick: nick, 
       id: Math.floor(Math.random()*99999999999).toString(),
       timestamp: new Date,
+      current_id: null,
   
-      poke: ->
+      poke: (current_id) ->
+        @current_id = current_id
         session.timestamp = new Date
   
       destroy: (channel, sessions) ->
