@@ -38,7 +38,8 @@ jQuery(function ($) {
 				var title = $("#osx-modal-title", self.container);
 				title.show();
 				d.container.show()
-				var h = $("#osx-modal-data", self.container).height()
+				var h = $("#osx-modal-data", self.container).height() +
+				  $("#search-results", self.container).height() +
 					+ title.height()
 					+ 20; // padding
 				$("#osx-container").height(h)
@@ -47,7 +48,32 @@ jQuery(function ($) {
 		}
 	};
 	
+	window.search = function(params){
+	  if(params == undefined){
+	    params = {};
+    }
+  	$.ajax({url: "/search", data: params, dataType: 'json',
+      success:function(data) {
+        $('#search-results').html(tmpl("data_tmpl",{data: data}));
+        $('#next_page').click(function(){
+          if(params.type){
+            var query = {type:params.type, page_start: data[data.length-1]._id};
+          }else{
+            var query = {page_start: data[data.length-1]._id}
+          }
+          search(query);
+        });
+    	  OSX.init();
+      }
+    })
+  }
+	
+	$("#open_search").click(function(e) {
+    search();
+  })
+	
 	$("#youtube_search").submit(function(e) {
+	  $('#search-results').html("");
 	  $("#osx-modal-data-list").children().remove();
 	  var search = $('#youtube_search_text').attr('value');
 	  var provider = $('input:radio[name=group1]:checked').val()
@@ -56,7 +82,9 @@ jQuery(function ($) {
         success:function(data) {
           var items = data.feed.entry; 
           for(var i = 0; i < items.length; i++){
-            $("#osx-modal-data-list").append('<li><a href="' + items[i].link[0].href + '" class="youtube_link">' + items[i].title.$t + "</li>")
+            var description = items[i].media$group.media$description.$t;
+            description = description.replace(/\"/g, "&quot;");
+            $("#osx-modal-data-list").append('<li><p><a title="'+description+'" href="' + items[i].link[0].href + '" class="youtube_link">' + items[i].title.$t + "</a></p></li>")
           } 
           $('.youtube_link').click(function(event){
             $.ajax({url: "/submit_youtube_link", type: "POST", data: {youtube_link: event.target.href}});
@@ -70,7 +98,8 @@ jQuery(function ($) {
       $.ajax({url: "http://api.soundcloud.com/tracks.json", data: { q: search , consumer_key: "keHOFdLJaAAm9mGxgUxYw"}, dataType: 'jsonp',
         success:function(data) {
           for(var i = 0; i < data.length; i++){
-            $("#osx-modal-data-list").append('<li><a href="' + data[i].permalink_url + '" class="soundcloud_link">' + data[i].title + "</li>")
+            var description = data[i].description.replace(/\"/g, "&quot;");
+            $("#osx-modal-data-list").append('<li><a href="' + data[i].permalink_url + '" title="'+ description +'" class="soundcloud_link">' + data[i].title +  "</a> <span style='font-size:8px'>"+ data[i].tag_list +"</span></li>")
           } 
           $('.soundcloud_link').click(function(event){
             $.ajax({url: "/submit_soundcloud_link", type: "POST", data: {soundcloud_link: event.target.href}});

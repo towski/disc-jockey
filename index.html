@@ -7,6 +7,7 @@
     <script src="media_queue.js" type="text/javascript"></script>
     <script src="client.js" type="text/javascript"></script>
     <script src="cookie.js" type="text/javascript"></script>
+    <script src="template.js" type="text/javascript"></script>
     <script src="soundmanager2.js" type="text/javascript"></script>
     <script src="swfobject.js" type="text/javascript"></script>
     <script src="soundcloud.player.api.js" type="text/javascript"></script>
@@ -108,7 +109,8 @@
         <div id="current-queue">
           <a id='toggle_playback' onclick='media_queue.togglePlayback(); return false' href='#'>Play</a> |
           <a onclick='media_queue.skipCurrentSong()' href='#' onclick='return false'>Skip</a> |
-          <a onclick="$('#song_list').children().remove(); media_queue.songs = []" href='#'>Clear Queue</a>
+          <a onclick="$('#song_list').children().remove(); media_queue.songs = []" href='#'>Clear Queue</a> |
+          <a id='open_search' href='#'>History</a>
           <h2>Currently</h2>
           <div id="soundcloud">
             <div id="myContent">
@@ -123,6 +125,10 @@
           <br/>
           <h2>Queue</h2>
           <ul id='song_list'>
+          </ul>
+        </div>
+        <div>
+          <ul id="users">
           </ul>
         </div>
         <div id="search-youtube" class='form'>
@@ -174,11 +180,45 @@
     <div id="osx-modal-content">
 			<div id="osx-modal-title"><center>Results</center></div>
 			<div class="close"><a href="#" class="simplemodal-close">x</a></div>
+			<div id="search-results">
+			</div>
 			<div id="osx-modal-data">
 			  <ul id="osx-modal-data-list">
 		    </ul>
 			</div>
 				<p><button class="simplemodal-close">Close</button></p>
 		</div>
+		<script type="text/html" id="data_tmpl">
+		  <select onchange="search({type: this.value});">
+		    <option></option>
+		    <option value="">everything</option>
+		    <option value="youtube">youtube</option>
+		    <option value="soundcloud">soundcloud</option>
+		    <option value="select">select</option>
+		    <option value="join">join</option>
+		    <option value="part">part</option>
+		    <option value="msg">message</option>
+		  </select>
+      <table>
+      <% var date; %>
+      <% for ( var i = 0; i < data.length; i++ ) { %>
+        <tr>
+        <% for (key in data[i]){ %>
+          <% if (key == "_id" || key == "id" || key == "url" ){ %>
+          <% }else if (key == "timestamp"){ %>
+            <% date = new Date(parseInt(data[i][key])); %>
+            <td><%=date.toLocaleTimeString()%></td>
+            <td><%=date.getMonth() + 1%></td>
+          <% }else if (key == "title"){ %>
+            <td><%=data[i][key]%></td>
+          <% }else{ %>
+            <td><%=data[i][key]%></td>
+          <% } %>
+        <% } %>
+        </tr>
+      <% } %>
+      </table>
+      <a href="#" id="next_page">next page</a>
+    </script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 (function() {
-  var ID3, SESSION_TIMEOUT, Server, chan, formidable, fs, http, mongodb, path, qs, starttime, static_files, sys, url, util, xml2js;
+  var ID3, ObjectId, SESSION_TIMEOUT, Server, chan, formidable, fs, http, mongodb, path, qs, starttime, static_files, sys, url, util, xml2js;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __indexOf = Array.prototype.indexOf || function(item) {
     for (var i = 0, l = this.length; i < l; i++) {
       if (this[i] === item) return i;
@@ -7,7 +7,7 @@
     return -1;
   };
   starttime = (new Date).getTime();
-  static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf", "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png", "/osx.css", "/osx.js", "/jquery.simplemodal.js"];
+  static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf", "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png", "/osx.css", "/osx.js", "/jquery.simplemodal.js", "/template.js"];
   sys = require("sys");
   url = require("url");
   qs = require("querystring");
@@ -20,6 +20,7 @@
   mongodb = require('mongodb');
   ID3 = require("id3");
   xml2js = require('xml2js');
+  ObjectId = mongodb.BSONPure.ObjectID;
   SESSION_TIMEOUT = 60 * 1000;
   exports.Server = Server = (function() {
     function Server(db) {
@@ -38,7 +39,7 @@
         return _results;
       }, this), 1000);
       this.server = http.createServer(__bind(function(req, res) {
-        var body, cookie, cookies, filename, form, id, match, nick, nicks, parts, pathname, result, session, session_id, since, text, uri, _i, _len, _ref, _ref2, _ref3;
+        var body, cookie, cookies, filename, form, id, match, nick, nicks, params, parts, pathname, result, search, session, session_id, since, text, uri, _i, _len, _ref, _ref2, _ref3;
         pathname = url.parse(req.url).pathname;
         res.simpleJSON = function(code, obj) {
           var body;
@@ -83,10 +84,10 @@
         id = qs.parse(url.parse(req.url).query).id;
         if (cookies.session_id && this.sessions[cookies.session_id]) {
           session = this.sessions[cookies.session_id];
-          session.poke();
+          session.poke(cookies.current_id);
         } else if (id && this.sessions[id]) {
           session = this.sessions[id];
-          session.poke();
+          session.poke(cookies.current_id);
         } else {
           session = {
             nick: "guest"
@@ -191,6 +192,24 @@
           }
           this.channel.appendMessage(session.nick, "msg", text);
           return res.simpleJSON(200, {});
+        } else if (pathname === "/search") {
+          search = {};
+          if (params.page_start) {
+            search._id = {
+              $lt: ObjectId(params.page_start)
+            };
+          }
+          if (params.type) {
+            search.type = params.type;
+          }
+          return new mongodb.Collection(this.db, 'messages').find(search, {
+            limit: 20,
+            sort: {
+              _id: -1
+            }
+          }).toArray(function(err, items) {
+            return res.simpleJSON(200, items);
+          });
         } else if (req.url === '/cleanup_bad_files') {
           return fs.readdir('./tmp', function(err, files) {
             var file, _j, _len2;

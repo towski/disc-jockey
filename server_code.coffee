@@ -3,7 +3,7 @@ starttime = (new Date).getTime()
 static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", 
   "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf",
   "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png",
-  "/osx.css", "/osx.js", "/jquery.simplemodal.js"]
+  "/osx.css", "/osx.js", "/jquery.simplemodal.js", "/template.js"]
 
 sys = require("sys")
 url = require("url")
@@ -17,6 +17,7 @@ chan = require("./channel")
 mongodb = require('mongodb')
 ID3 = require("id3")
 xml2js = require('xml2js')
+ObjectId = mongodb.BSONPure.ObjectID;
 
 SESSION_TIMEOUT = 60 * 1000
 
@@ -67,10 +68,10 @@ exports.Server = class Server
       id = qs.parse(url.parse(req.url).query).id
       if cookies.session_id && @sessions[cookies.session_id]
         session = @sessions[cookies.session_id]
-        session.poke()
+        session.poke(cookies.current_id)
       else if id && @sessions[id]
         session = @sessions[id]
-        session.poke()
+        session.poke(cookies.current_id)
       else
         session = {nick: "guest"}
       
@@ -154,6 +155,16 @@ exports.Server = class Server
           return
         @channel.appendMessage(session.nick, "msg", text)
         res.simpleJSON(200, {})
+        
+      else if (pathname == "/search")
+        search = {}
+        if params.page_start
+          search._id = {$lt: ObjectId(params.page_start)}
+        if params.type
+          search.type = params.type
+          
+        new mongodb.Collection(@db, 'messages').find(search, {limit: 20, sort: {_id: -1}}).toArray (err, items) ->
+          res.simpleJSON(200, items)
       
       else if req.url == '/cleanup_bad_files'
         fs.readdir './tmp', (err, files) ->
