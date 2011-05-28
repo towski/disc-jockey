@@ -173,3 +173,11 @@ a:hover { text-decoration: underline; color: #aaa; }
    height: 15px;
    font-size: 1px;
 }
+
+.current {
+  color: red;
+}
+
+td {
+  padding: 5px;
+}

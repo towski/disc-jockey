@@ -1,5 +1,5 @@
-exports = exports ? this
-  
+exports = exports ? this  
+
 exports.MediaQueue = class MediaQueue
   constructor: ->
     @songs = []
@@ -8,17 +8,19 @@ exports.MediaQueue = class MediaQueue
     @local_playback = false
     @soundcloud_started = false
     @soundcloud_registered = false
+    @current_id = null
 
   queueYoutube: (video) ->
     video.type = 'youtube'
     video.vid = video.text
     @songs = @songs.concat(video)
-    $('#song_list').append("<li>youtube video <a href='#{video.url}' target='_blank'>#{video.title}</a> <a href='#' onclick='window.media_queue.removeSongs(#{video.id}); $(this.parentElement).remove(); return false'>x</a></li>")
+    $('#song_list').append("<li id='song#{video.id}'>youtube video <a href='#{video.url}' target='_blank'>#{video.title}</a> <a href='#' onclick='window.media_queue.removeSongs(#{video.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     if @local_playback && !@playback_started
       @playNext()
       
   queueSoundCloud: (array) ->
     @songs = @songs.concat({type: 'soundcloud', url: array.text, id: array.id})
+    $('#song_list').append("<li id='song#{array.id}'>soundcloud url #{array.text} <a href='#' onclick='window.media_queue.removeSongs(#{array.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     if @local_playback && !@playback_started
       @playNext()
   
@@ -26,7 +28,7 @@ exports.MediaQueue = class MediaQueue
     song.type = 'mp3'
     song.file = song.text
     @songs = @songs.concat(song)
-    $('#song_list').append("<li>#{song.artist} - #{song.album} - #{song.title} <a href='#' onclick='window.media_queue.removeSongs(#{song.id}); $(this.parentElement).remove(); return false'>x</a></li>")
+    $('#song_list').append("<li id='song#{song.id}'>#{song.artist} - #{song.album} - #{song.title} <a href='#' onclick='window.media_queue.removeSongs(#{song.id}); $(this.parentElement).remove(); return false'>x</a></li>")
     if @local_playback && !@playback_started
       @playNext()
     return song
@@ -38,7 +40,6 @@ exports.MediaQueue = class MediaQueue
         @currentSong.destruct()
         $('#current_song').html("")
       else if @currentSong.type == "youtube"
-        console.log("hiding")
         $("#youtube_mother").hide()
       else if @currentSong.type == "soundcloud"
         if @sound_cloud_registered
@@ -51,11 +52,12 @@ exports.MediaQueue = class MediaQueue
   playNext: () ->
     song = @songs[0]
     @songs = @songs.splice(1, @songs.length)
+    $("#song#{@current_id}").removeClass('current')
     if song
+      $("#song#{song.id}").addClass('current')
+      @current_id = song.id
+      Cookie.set('current_id', @current_id)
       @playback_started = true
-      setTimeout ->
-        $('#song_list li:first-child').remove()
-      , 0
       if song.type == 'youtube'
         @readyVideoPlayer(song)
       else if song.type == 'mp3'

@@ -181,7 +181,6 @@
             break;
           case "soundcloud":
             addMessage(message.nick, "requested a soundcloud link", message.timestamp, "join");
-            $('#song_list').append("<li>soundcloud url " + message.text + " <a href='#' onclick='window.media_queue.removeSongs(" + message.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
             window.media_queue.queueSoundCloud(message);
             break;
           case "upload":
