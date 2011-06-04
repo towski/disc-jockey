@@ -15,7 +15,7 @@
           $in: ["youtube", "upload", "soundcloud", "select"]
         }
       }, {
-        limit: 100,
+        limit: 20,
         sort: {
           _id: -1
         }
