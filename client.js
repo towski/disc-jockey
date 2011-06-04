@@ -369,7 +369,7 @@
         url: "/check_session",
         success: function(response) {
           if (response.success) {
-            return showChat();
+            return onConnect(response.session);
           }
         }
       });
