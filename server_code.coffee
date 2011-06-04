@@ -3,7 +3,7 @@ starttime = (new Date).getTime()
 static_files = ["/", "/style.css", "/client.js", "/cookie.js", "/jquery-1.2.6.min.js", 
   "/soundmanager2.js", "/swf/soundmanager2.swf", "/swfobject.js", "/media_queue.js", "/soundcloud.player.api.js", "/swf/player.swf",
   "/background-white.png", "/roundedcornr_br.png", "/roundedcornr_tr.png", "/roundedcornr_bl.png", "/roundedcornr_tl.png",
-  "/osx.css", "/osx.js", "/jquery.simplemodal.js", "/template.js"]
+  "/osx.css", "/osx.js", "/jquery.simplemodal.js", "/template.js", "/index.iphone", "/core.js", "/changecss.js"]
 
 sys = require("sys")
 url = require("url")
@@ -227,7 +227,7 @@ exports.Server = class Server
       else if (pathname == "/check_session")
         id = cookies.session_id
         if (id && @sessions[id])
-          res.simpleJSON(200, {success: true})
+          res.simpleJSON(200, {success: true, session: @sessions[id]})
         else
           res.simpleJSON(200, {success: false})
       
