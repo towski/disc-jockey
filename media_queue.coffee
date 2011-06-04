@@ -52,9 +52,9 @@ exports.MediaQueue = class MediaQueue
   playNext: () ->
     song = @songs[0]
     @songs = @songs.splice(1, @songs.length)
-    $("#song#{@current_id}").removeClass('current')
+    $("#song#{@current_id}").removeClass(CONFIG.nick)
     if song
-      $("#song#{song.id}").addClass('current')
+      $("#song#{song.id}").addClass(CONFIG.nick)
       @current_id = song.id
       Cookie.set('current_id', @current_id)
       @playback_started = true

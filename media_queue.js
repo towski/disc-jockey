@@ -65,9 +65,9 @@
       var song;
       song = this.songs[0];
       this.songs = this.songs.splice(1, this.songs.length);
-      $("#song" + this.current_id).removeClass('current');
+      $("#song" + this.current_id).removeClass(CONFIG.nick);
       if (song) {
-        $("#song" + song.id).addClass('current');
+        $("#song" + song.id).addClass(CONFIG.nick);
         this.current_id = song.id;
         Cookie.set('current_id', this.current_id);
         this.playback_started = true;

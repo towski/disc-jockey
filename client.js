@@ -1,6 +1,6 @@
 (function() {
-  var CONFIG, addMessage, exports, first_poll, longPoll, nicks, onConnect, outputUsers, send, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, util, who, ytswf;
-  CONFIG = {
+  var addMessage, exports, first_poll, longPoll, nicks, onConnect, outputUsers, send, showConnect, showLoad, starttime, transmission_errors, updateTitle, updateUptime, updateUsersLink, userJoin, userPart, who, ytswf;
+  window.CONFIG = {
     debug: false,
     nick: "#",
     id: null,
@@ -18,6 +18,8 @@
     }
     return color.slice(0, 6);
   };
+  CONFIG.nick = "guest";
+  jQuery().changecss(".guest", 'color', generateColor("guest"));
   updateUsersLink = function() {
     var t;
     t = nicks.length.toString() + " user";
@@ -89,15 +91,22 @@
   transmission_errors = 0;
   first_poll = true;
   longPoll = function(data) {
-    var message, song, _i, _len, _ref;
+    var current_id, message, nick, song, _i, _len, _ref, _ref2;
     if (transmission_errors > 2) {
       showConnect();
       return;
     }
+    if (data && data.current_ids) {
+      _ref = data.current_ids;
+      for (nick in _ref) {
+        current_id = _ref[nick];
+        jQuery().changecss("." + nick, 'color', generateColor(nick));
+      }
+    }
     if (data && data.messages) {
-      _ref = data.messages;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        message = _ref[_i];
+      _ref2 = data.messages;
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        message = _ref2[_i];
         if (message.timestamp > CONFIG.last_message_time) {
           CONFIG.last_message_time = message.timestamp;
         }
@@ -196,7 +205,9 @@
       $('toolbar').show();
       return;
     }
+    CONFIG.color = generateColor(session.nick);
     CONFIG.nick = session.nick;
+    jQuery().changecss("." + CONFIG.nick, 'color', CONFIG.color);
     CONFIG.id = session.id;
     starttime = new Date(session.starttime);
     showChat(CONFIG.nick);

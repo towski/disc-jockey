@@ -1,4 +1,4 @@
-CONFIG = { debug: false
+window.CONFIG = { debug: false
              , nick: "#"   # set in onConnect
              , id: null    # set in onConnect
              , last_message_time: 1
@@ -17,6 +17,9 @@ window.generateColor = (string) ->
   while color.length < 6
     color = "0" + color
   color.slice(0, 6)
+
+CONFIG.nick = "guest"
+jQuery().changecss(".guest", 'color', generateColor("guest"))
 
 #updates the users link to reflect the number of active users
 updateUsersLink = () ->
@@ -125,6 +128,10 @@ longPoll = (data) ->
     showConnect()
     return
 
+  if (data && data.current_ids)
+    for nick, current_id of data.current_ids
+      jQuery().changecss(".#{nick}", 'color', generateColor(nick))
+      #$("#song#{current_id}").addClass("#{nick}")
   #process any updates we may have
   #data will be null on the first call of longPoll
   if (data && data.messages)
@@ -228,7 +235,9 @@ onConnect = (session) ->
     $('toolbar').show()
     return
 
+  CONFIG.color = generateColor(session.nick)
   CONFIG.nick = session.nick
+  jQuery().changecss(".#{CONFIG.nick}", 'color',CONFIG.color)
   CONFIG.id   = session.id
   starttime   = new Date(session.starttime)
 
