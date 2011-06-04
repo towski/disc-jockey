@@ -1,10 +1,12 @@
 sys = require("sys")
+mongodb = require('mongodb')
 MESSAGE_BACKLOG = 200
 exports.Channel = class Channel
   constructor: (db) ->
     @db = db
     @index = 1
-    @messages = []
+    new mongodb.Collection(@db, 'messages').find({type: {$in: ["youtube", "upload", "soundcloud", "select"]}}, {limit: 100, sort: {_id: -1}}).toArray (err, items) =>
+      @messages = items
     @callbacks = []
     @files = [".gitignore"]
     # clear old callbacks

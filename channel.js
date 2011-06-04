@@ -1,14 +1,26 @@
 (function() {
-  var Channel, MESSAGE_BACKLOG, sys;
+  var Channel, MESSAGE_BACKLOG, mongodb, sys;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   sys = require("sys");
+  mongodb = require('mongodb');
   MESSAGE_BACKLOG = 200;
   exports.Channel = Channel = (function() {
     function Channel(db) {
       var clearCallbacks;
       this.db = db;
       this.index = 1;
-      this.messages = [];
+      new mongodb.Collection(this.db, 'messages').find({
+        type: {
+          $in: ["youtube", "upload", "soundcloud", "select"]
+        }
+      }, {
+        limit: 100,
+        sort: {
+          _id: -1
+        }
+      }).toArray(__bind(function(err, items) {
+        return this.messages = items;
+      }, this));
       this.callbacks = [];
       this.files = [".gitignore"];
       clearCallbacks = __bind(function() {
