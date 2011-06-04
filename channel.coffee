@@ -5,8 +5,12 @@ exports.Channel = class Channel
   constructor: (db) ->
     @db = db
     @index = 1
+    @messages = []
     new mongodb.Collection(@db, 'messages').find({type: {$in: ["youtube", "upload", "soundcloud", "select"]}}, {limit: 100, sort: {_id: -1}}).toArray (err, items) =>
-      @messages = items
+      for item in items
+        item.id = @index
+        @index += 1
+        @messages.push item
     @callbacks = []
     @files = [".gitignore"]
     # clear old callbacks

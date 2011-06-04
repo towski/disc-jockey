@@ -9,6 +9,7 @@
       var clearCallbacks;
       this.db = db;
       this.index = 1;
+      this.messages = [];
       new mongodb.Collection(this.db, 'messages').find({
         type: {
           $in: ["youtube", "upload", "soundcloud", "select"]
@@ -19,7 +20,15 @@
           _id: -1
         }
       }).toArray(__bind(function(err, items) {
-        return this.messages = items;
+        var item, _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = items.length; _i < _len; _i++) {
+          item = items[_i];
+          item.id = this.index;
+          this.index += 1;
+          _results.push(this.messages.push(item));
+        }
+        return _results;
       }, this));
       this.callbacks = [];
       this.files = [".gitignore"];
