@@ -98,7 +98,11 @@ jQuery(function ($) {
       $.ajax({url: "http://api.soundcloud.com/tracks.json", data: { q: search , consumer_key: "keHOFdLJaAAm9mGxgUxYw"}, dataType: 'jsonp',
         success:function(data) {
           for(var i = 0; i < data.length; i++){
-            var description = data[i].description.replace(/\"/g, "&quot;");
+            if(data[i].description){
+              var description = data[i].description.replace(/\"/g, "&quot;");
+            } else {
+              var description = null 
+            }
             $("#osx-modal-data-list").append('<li><a href="' + data[i].permalink_url + '" title="'+ description +'" class="soundcloud_link">' + data[i].title +  "</a> <span style='font-size:8px'>"+ data[i].tag_list +"</span></li>")
           } 
           $('.soundcloud_link').click(function(event){
