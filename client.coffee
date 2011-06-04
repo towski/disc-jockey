@@ -373,7 +373,7 @@ $(document).ready () ->
       type: "get", dataType: "json", url: "/check_session",
       success: (response) ->
         if(response.success)
-          showChat()
+          onConnect(response.session)
     })
   $('#youtube_toggle').click()
   $('#search_youtube_toggle').click()
