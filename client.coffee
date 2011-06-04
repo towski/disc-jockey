@@ -12,51 +12,11 @@ exports = if exports
 else
   this
 
-Array.prototype.remove = (from, to) ->
-  rest = this.slice((to || from) + 1 || this.length);
-  this.length = if from < 0 
-    this.length + from 
-  else
-    from
-  return this.push.apply(this, rest);
-
-Date.prototype.toRelativeTime = (now_threshold) ->
-  delta = new Date() - this
-
-  now_threshold = parseInt(now_threshold, 10)
-
-  if (isNaN(now_threshold))
-    now_threshold = 0
-
-  if (delta <= now_threshold)
-    return 'Just now'
-
-  units = null
-  conversions = {
-    millisecond: 1, # ms    -> ms
-    second: 1000,   # ms    -> sec
-    minute: 60,     # sec   -> min
-    hour:   60,     # min   -> hour
-    day:    24,     # hour  -> day
-    month:  30,     # day   -> month (roughly)
-    year:   12      # month -> year
-  }
-
-  for key in conversions
-    if delta < conversions[key]
-      break
-    else
-      units = key # keeps track of the selected key over the iteration
-      delta = delta / conversions[key]
-
-  # pluralize a unit when the difference is greater than 1.
-  delta = Math.floor(delta)
-  if delta != 1
-    units += "s"
-  return [delta, units].join(" ")
-
-Date.fromString = (str) ->
-  return new Date(Date.parse(str))
+window.generateColor = (string) ->
+  color = Math.abs(string.hashCode()).toString(16)
+  while color.length < 6
+    color = "0" + color
+  color.slice(0, 6)
 
 #updates the users link to reflect the number of active users
 updateUsersLink = () ->
@@ -89,44 +49,6 @@ userPart = (parting, timestamp) ->
       break
   #update the UI
   updateUsersLink()
-
-# utility functions
-
-util = {
-  urlRE: /https?:\/\/([-\w\.]+)+(:\d+)?(\/([^\s]*(\?\S+)?)?)?/g, 
-
-  #  html sanitizer 
-  toStaticHTML: (inputHtml) ->
-    inputHtml = inputHtml.toString()
-    return inputHtml.replace(/&/g, "&amp")
-                    .replace(/</g, "&lt")
-                    .replace(/>/g, "&gt")
-  , 
-
-  #pads n with zeros on the left,
-  #digits is minimum length of output
-  #zeroPad(3, 5) returns "005"
-  #zeroPad(2, 500) returns "500"
-  zeroPad: (digits, n) ->
-    n = n.toString()
-    while (n.length < digits) 
-      n = '0' + n
-    return n
-  ,
-
-  #it is almost 8 oclock PM here
-  #timeString(new Date) returns "19:49"
-  timeString: (date)->
-    minutes = date.getMinutes().toString()
-    hours = date.getHours().toString()
-    return this.zeroPad(2, hours) + ":" + this.zeroPad(2, minutes)
-  ,
-
-  #does the argument only contain whitespace?
-  isBlank: (text) ->
-    blank = /^\s*$/
-    return (text.match(blank) != null)
-}
 
 #used to keep the most recent messages visible
 exports.scrollDown = () ->
