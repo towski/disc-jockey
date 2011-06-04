@@ -16,7 +16,7 @@
       video.type = 'youtube';
       video.vid = video.text;
       this.songs = this.songs.concat(video);
-      $('#song_list').append("<li id='song" + video.id + "'>youtube video <a href='" + video.url + "' target='_blank'>" + video.title + "</a> <a href='#' onclick='window.media_queue.removeSongs(" + video.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
+      $('#song_list').prepend("<li id='song" + video.id + "'>youtube video <a href='" + video.url + "' target='_blank'>" + video.title + "</a> <a href='#' onclick='window.media_queue.removeSongs(" + video.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
       if (this.local_playback && !this.playback_started) {
         return this.playNext();
       }
@@ -27,7 +27,7 @@
         url: array.text,
         id: array.id
       });
-      $('#song_list').append("<li id='song" + array.id + "'>soundcloud url " + array.text + " <a href='#' onclick='window.media_queue.removeSongs(" + array.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
+      $('#song_list').prepend("<li id='song" + array.id + "'>soundcloud url " + array.text + " <a href='#' onclick='window.media_queue.removeSongs(" + array.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
       if (this.local_playback && !this.playback_started) {
         return this.playNext();
       }
@@ -36,7 +36,7 @@
       song.type = 'mp3';
       song.file = song.text;
       this.songs = this.songs.concat(song);
-      $('#song_list').append("<li id='song" + song.id + "'>" + song.artist + " - " + song.album + " - " + song.title + " <a href='#' onclick='window.media_queue.removeSongs(" + song.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
+      $('#song_list').prepend("<li id='song" + song.id + "'>" + song.artist + " - " + song.album + " - " + song.title + " <a href='#' onclick='window.media_queue.removeSongs(" + song.id + "); $(this.parentElement).remove(); return false'>x</a></li>");
       if (this.local_playback && !this.playback_started) {
         this.playNext();
       }
