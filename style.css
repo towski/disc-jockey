@@ -7,7 +7,8 @@ body, #entry {
   color: #111;
 }
 body, table {
-  font: 13.34px helvetica,arial,freesans,clean,sans-serif;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+  
   line-height: 150%;
 }
 tr,td,table {
@@ -46,13 +47,13 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #app {
   position:relative;
-  width:900px;
+  width:90%;
   margin:50px auto 0px;
   background:white;
 }
 
 #left {
-  width:60%;
+  width:100%;
 }
 
 #activity {  
@@ -95,9 +96,6 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #song_list {
-  height:20%;
-  overflow-x:hidden;
-  overflow-y:auto;
 }
 
 /* not very important info */
@@ -174,10 +172,6 @@ a:hover { text-decoration: underline; color: #aaa; }
    font-size: 1px;
 }
 
-.current {
-  color: red;
-}
-
-td {
+#search-results td {
   padding: 5px;
 }

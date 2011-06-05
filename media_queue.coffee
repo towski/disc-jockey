@@ -58,6 +58,8 @@ exports.MediaQueue = class MediaQueue
       @current_id = song.id
       Cookie.set('current_id', @current_id)
       @playback_started = true
+      $('.header').html("&nbsp;")
+      $("##{song.type}-header").html(song.type)
       if song.type == 'youtube'
         @readyVideoPlayer(song)
       else if song.type == 'mp3'

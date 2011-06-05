@@ -71,6 +71,8 @@
         this.current_id = song.id;
         Cookie.set('current_id', this.current_id);
         this.playback_started = true;
+        $('.header').html("&nbsp;");
+        $("#" + song.type + "-header").html(song.type);
         if (song.type === 'youtube') {
           return this.readyVideoPlayer(song);
         } else if (song.type === 'mp3') {

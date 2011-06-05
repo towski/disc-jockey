@@ -86,7 +86,7 @@
     <div id="app">
       <div class="roundedcornr_top"><div></div></div>
       <div id="content" style='margin: 0 15px'>
-      <div id="activity">
+      <div id="activity" style='display:none'>
         <h2> Activity </h2>
         <div id="log">
         </div>
@@ -107,30 +107,36 @@
         </div>
         <div id="loading" style="position:fixed; display:none"><p>loading</p></div>
       </div>
-      <div id="left">
-        <div id="current-queue">
+      <div id="left" style=''>
+        <div id="current-queue" style='float:right; width: 450px;'>
+          <h2 id='mp3-header' class='header'>&nbsp;</h2>
+          <span id='current_song' style='height:47px;'>&nbsp;</span>
+          <h2 id='soundcloud-header' class='header'>&nbsp;</h2>
+          <div id="soundcloud" style='height: 61px'>
+            <div id="myContent">
+            </div>
+          </div>
+          <h2 id='youtube-header' class='header'>&nbsp;</h2>
+          <div style='width:300px; height: 300px; '>
+            <div id='youtube_mother' style='display:none;'>
+              <div id="ytapiplayer">
+                You need Flash player 9+ and JavaScript enabled to view this video.
+              </div>
+            </div>
+          </div>
+          <br/>
+        </div>
+        <div>
+          <ul id="users">
+          </ul>
+        </div>
+        <div>
           <a id='toggle_playback' onclick='media_queue.togglePlayback(); return false' href='#'>Play</a> |
           <a onclick='media_queue.skipCurrentSong()' href='#' onclick='return false'>Skip</a> |
           <a onclick="$('#song_list').children().remove(); media_queue.songs = []" href='#'>Clear Queue</a> |
           <a id='open_search' href='#'>History</a>
-          <h2>Currently</h2>
-          <div id="soundcloud">
-            <div id="myContent">
-            </div>
-          </div>
-          <div id='youtube_mother' style='display:none'>
-            <div id="ytapiplayer">
-              You need Flash player 9+ and JavaScript enabled to view this video.
-            </div>
-          </div>
-          <span id='current_song'></span>
-          <br/>
           <h2>Queue</h2>
           <ul id='song_list'>
-          </ul>
-        </div>
-        <div>
-          <ul id="users">
           </ul>
         </div>
         <div id="search-youtube" class='form'>
